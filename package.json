@@ -1,0 +1,32 @@
+{
+  "name": "markdown-more",
+  "version": "0.5.0",
+  "description": "Helpers for creating markdown-js filters",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {
+    "markdown": "^0.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Xananax/markdownmore.git"
+  },
+  "keywords": [
+    "markdown",
+    "markdown-js",
+    "filters",
+    "preprocessor"
+  ],
+  "author": "xananax@yelostudio.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Xananax/markdownmore/issues"
+  },
+  "homepage": "https://github.com/Xananax/markdownmore"
+}

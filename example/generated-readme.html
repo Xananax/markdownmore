@@ -1,0 +1,51 @@
+<html><head><title>Markdown-Additions Examples</title></head><body><h1>TOC</h1><ul class="toc"><li><a href="#toc-markdown-more">Markdown-More</a></li><li><a href="#toc-api">API</a></li><li><a href="#toc-examples">Examples:</a></li><li><a href="#toc-license">LICENSE</a></li></ul>
+
+<h1 id="toc-markdown-more">Markdown-More</h1>
+
+<p>Little additions on top of <a href="https://github.com/evilstreak/markdown-js">markdown-js</a>.<br/>Comes with a little set of helpers to register filters easily.  </p>
+
+<h3 id="toc-api">API</h3>
+
+<h4>Markdown(string[,locals])</h4>
+
+<p>equivalent to the original <code>markdown.toHTML()</code>, but goes through all the filters before rendering. <code>locals</code> is anything you want to pass to your functions.</p>
+
+<h4>Markdown.register(hook)</h4>
+
+<p>Returns a function <code>register(function)</code> that allows to register functions on the defined hook. Hooks are (in order):</p>
+
+<ul><li>&#39;before&#39;: acts on the raw string</li><li>&#39;json&#39;: acts on the jsonmlTree</li><li>&#39;html&#39;: acts on the htmlTree</li><li>&#39;after&#39;: acts on the raw html string</li></ul>
+
+<p><span>Example:<br/></span><code><span>js<br/>var register_html = markdown.register(&#39;html&#39;);<br/>register_html(func1);<br/></span></code></p>
+
+<p><strong>Note</strong>: Function order <strong>MATTERS</strong>.</p>
+
+<h4>Markdown.register(hook,function)</h4>
+
+<p>Registers a function at a particular hook.<br/>All functions have a signature of <code>function(data,locals)</code>, where <code>locals</code> is whatever you passed down to <code>markdown()</code> and <code>data</code> is:</p>
+
+<ul><li>Functions defined in &#39;before&#39; and &#39;after&#39; receive an object {str:string}, where the string is respectively the raw text and the raw html</li><li>Functions defined in &#39;json&#39; receive the jsonml tree</li><li>Functions defined in &#39;html&#39; receive the html tree</li></ul>
+
+<p><span>All functions are expected to work on the first argument passed and shouldn&#39;t return anything.<br/></span><code>Markdown.register(hook,function)</code><span> returns a curried version of itself, so you can chain, for example:<br/></span><code><span>js<br/>markdown.register(&#39;json&#39;)(func1)(func2)(func3);<br/>//is equivalent to<br/>markdown.register(&#39;json&#39;)(func1);<br/>markdown.register(&#39;json&#39;)(func2);<br/>markdown.register(&#39;json&#39;)(func3);<br/></span></code></p>
+
+<h4>Markdown.makeJsonFilter(function)</h4>
+
+<p>Registers a function at json level. Will go through every item in the jsonml array, and passe them to the function. The function is tasked with returning explicitely <code>false</code> for every item it does <em>not</em> want to parse.</p>
+
+<h4>Markdown.makeJsonFilter(RegExp[,baseElem],parse)</h4>
+
+<p>Registers a json filter that uses the provided RegExp to parse the tree. The <code>parse</code> function passed should have a signature of: <code>function(chunk,locals)</code>, where <code>locals</code> is whatever you passed, <code>chunk</code> is the current processed chunk of text that matches the RegExp you provided, and <code>baseElem</code><span> is how you want your returned element to be wrapped (&#39;text&#39;,&#39;para&#39;...), and defaults to &#39;text&#39;.<br/></span><code>this.regExp</code> will be filled with the regExp you provided.<br/><span>Here is an easy example to turn line returns into &lt;br&gt;:<br/></span><code><span>js<br/>var lineReturnsFilter = markdown.makeJsonFilter(/(\n|\r)/g,&#39;text&#39;,function(chunk){<br/>    if(chunk.match(this.regExp)){<br/>        return [&#39;linebreak&#39;];<br/>    }<br/>    return chunk;<br/>});<br/>markdown.register(&#39;json&#39;,lineReturnsFilter);<br/></span></code></p>
+
+<h4>Markdown.registerJsonFilter(RegExp,baseElem,parse)</h4>
+
+<p>Same as <code>makeJsonFilter</code>, but avoids the step of having to register the function.</p>
+
+<h3 id="toc-examples">Examples:</h3>
+
+<p>You&#39;ll find a few examples in <code>example/filter.js</code>, namely to:</p>
+
+<ul><li><span>turn &quot;<label class="checkbox" for="checkbox0"><input type="checkbox" tabindex="0" class="input-checkbox" id="checkbox0" checked="checked"></input><span class="checkbox-label">abcde</span></label>&quot; into checkboxes, <label class="checkbox" for="checkbox1"><input type="checkbox" tabindex="1" class="input-checkbox" id="checkbox1"></input><span class="checkbox-label"></span></label> into unticked checkboxes, and <label class="checkbox" for="checkbox2"><input type="checkbox" tabindex="2" class="input-checkbox" id="checkbox2" checked="checked" disabled="disabled"></input><span class="checkbox-label"></span></label> into ticked </span><em>and</em> disabled checkboxes (as well as a handy function to sync checking of those boxes with the underlying markdown), while keeping your <a href="#">links</a><span> intact. If a text immediatly follows a <label class="checkbox" for="checkbox3"><input type="checkbox" tabindex="3" class="input-checkbox" id="checkbox3" checked="checked"></input><span class="checkbox-label"></span></label>, it will be considered a label (as long as there is no space between them).</span></li><li><span>turn <span class="mention" data-for="mention:string">@string</span> into mentions and <span class="hashtag" data-for="hashtag:string">#string</span> into hashtags</span></li><li>turn line returns (<code>\r</code>,<code>\n</code>) into <code>&lt;br&gt;</code></li><li><span>turn <span class="arrow arrow-right">→</span> and <span class="arrow arrow-left">←</span> into arrows</span></li><li><span>turn <a class="note-link" href="/45435kdfgfd">45435kdfgfd</a> into a link</span></li><li>create a table of contents automagically</li><li>Have a very simple mustache-type renderer that turns (I am replaced) into text, before rendering</li><li>And a very simple html wrapper, that wraps the whole result, after rendering.</li></ul>
+
+<h3 id="toc-license">LICENSE</h3>
+
+<p>MIT</p></body></html>
