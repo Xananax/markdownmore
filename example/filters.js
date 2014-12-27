@@ -1,5 +1,9 @@
 module.exports = function(markdown){
 
+	// creates a Table of Contents Automatically
+	// This function adds the ids to the titles
+	// the function that actually adds the TOC in the
+	// document is below
 	markdown.registerJsonFilter(function(jsonml,locals){
 		if(jsonml[0] === 'header'){
 			var level = jsonml[1].level;
@@ -22,12 +26,15 @@ module.exports = function(markdown){
 		return false;
 	});
 
+	// replaces [*], [ ], and [x] with custom markup to avoid
+	// being parsed as link references
 	markdown.register('before',function(data,locals){
 		data.str = data.str.replace(/\[((\s)|(x|\\?\*|✓|✔|☑)|(x|×|X|✕|☓|✖|✗|✘|#))\]/g,function(total,inside,space,ticked,disabled){
 			return '|CHECKBOX|'+(space?'S':ticked?'T':'D')+'|ENDCHECKBOX|';
 		});
 	});
 
+	// replaces the custom markup generated above with checkboxes
 	markdown.registerJsonFilter(/(\|CHECKBOX\|[STD]\|ENDCHECKBOX\|[A-Za-z0-9]*)/g,function(chunk,locals){
 		if(chunk.match(this.regExp)){
 			chunk = chunk.split('|');
@@ -55,6 +62,7 @@ module.exports = function(markdown){
 		return chunk
 	});
 
+	// replaces @mention and #hashtag with spans
 	markdown.registerJsonFilter(/([@#][A-Za-z0-9][A-Za-z0-9_]{0,40})/g,function(chunk){
 		if(chunk[0].match(/@|#/)){
 			var type = (chunk[0]=='@'?'mention':'hashtag');
@@ -69,6 +77,7 @@ module.exports = function(markdown){
 		return chunk;
 	})
 
+	// replaces line breaks with <br>
 	markdown.registerJsonFilter(/(\n|\r)/g,function(chunk){
 		if(chunk.match(this.regExp)){
 			return ['linebreak'];
@@ -76,6 +85,7 @@ module.exports = function(markdown){
 		return chunk;
 	});
 
+	// replaces <- and -> with unicode arrows
 	markdown.registerJsonFilter(/(<-|->)/g,function(chunk){
 		if(chunk.match(this.regExp)){
 			var dirLeft = (chunk[0]=='<');
@@ -84,7 +94,7 @@ module.exports = function(markdown){
 		return chunk;
 	});
 
-
+	// replaces >SomeRandomString with a link to "SomeRandomString"
 	markdown.registerJsonFilter(/(>[\w\d]+?)(\s|$|\.)/g,function(chunk){
 		if(chunk[0]=='>'){
 			var url = chunk.replace('>','');
@@ -93,6 +103,8 @@ module.exports = function(markdown){
 		return chunk
 	});
 
+	// follow up to the Table of Contents creation
+	// This function actually inserts the TOC in the document
 	markdown.registerJsonFilter(function(jsonml,locals){
 		if(locals.tocLinks){
 			locals.tocLinks.unshift('ul',{class:'toc'});
@@ -101,12 +113,14 @@ module.exports = function(markdown){
 		return true;
 	});
 
+	// Simple mustache-like variables replacement
 	function mustacheLike(data,locals){
 		data.str = data.str.replace(/(?:\{\{(.*?)\}\})/g,function(total,key){
 			return (locals && locals[key]) || '';
 		});
 	}
 
+	// Adds text around the generated html
 	function wrapHTML(data,locals){
 		data.str = '<html><head><title>'+
 			locals.title+
@@ -115,7 +129,16 @@ module.exports = function(markdown){
 			'</body></html>'
 	}
 
+	// registers function on the raw text:
 	markdown.register('before')(mustacheLike);
+
+	// registers functions on the generated html
 	markdown.register('after')(wrapHTML);
+
+	// there is no need for:
+	// markdown.register('json')(...)
+	// because all the json functions have been created with
+	// markdown.registerJsonFilter wich automatically
+	// registers the functions
 	
 };
