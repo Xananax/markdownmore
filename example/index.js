@@ -1,5 +1,7 @@
 var markdown = require('../index')
-var additions = require('./filters')(markdown)
+require('./filters')(markdown);
+require('./maths')(markdown);
+
 var readFile = function(file){return require('fs').readFileSync(__dirname+'/'+file,{encoding:'utf8'});}
 var readme = readFile('../README.md');
 var readme_for_js = readme.replace(/"/g,'\\"').replace(/\n/g,'\\n');

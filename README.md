@@ -83,5 +83,17 @@ You'll find a few examples in `example/filter.js`, namely to:
   - Have a very simple mustache-type renderer that turns {{exampleVar}} into text, before rendering
   - And a very simple html wrapper, that wraps the whole result, after rendering.
 
+There is also an example of basic math parsing, which, coupled with tables, should allow you to create pretty easily things like quotations:
+
+|item       | number  | units   | unit price | total    |
+|:----------|:-------:|:-------:|:----------:|---------:| 
+| something |   a=3   |   b=a   |   c=40     |  d=(a*c)$|
+
+Or just in-line operations like: "if a=12.4 and b=15, and we want to make some weird operation, the result is c=(round(a+b)*ceil(a-b))".
+Or even incremental operations: if I begin with a variable myVar, which equals myVar=1, and add 1 myVar=(myVar+1)!, and add 2 myVar=(myVar+2)!, what's myVar? myVar is myVar=(myVar). The "!" at the end forbids printing the value.
+Just make sure to not leave spaces in your ( ) if you want them evaluated.
+
+Run the examples by navigating to `example` and running `node index.js`, or simply check out the generated `generated-readme.html` in there.
+
 ### LICENSE
 MIT
