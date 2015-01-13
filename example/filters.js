@@ -94,10 +94,10 @@ module.exports = function(markdown){
 		return chunk;
 	});
 
-	// replaces >SomeRandomString with a link to "SomeRandomString"
-	markdown.registerJsonFilter(/(>[\w\d]+?)(\s|$|\.)/g,function(chunk){
-		if(chunk[0]=='>'){
-			var url = chunk.replace('>','');
+	// replaces |>SomeRandomString with a link to "SomeRandomString"
+	markdown.registerJsonFilter(/(\|>\s?[\w\d]+?)(\s|$|\.)/g,function(chunk){
+		if(chunk.match(this.regExp)){
+			var url = chunk.replace(/^\|>\s?/,'');
 			return ['link',{class:'note-link',href:"/"+url},url];
 		}
 		return chunk
@@ -125,7 +125,7 @@ module.exports = function(markdown){
 		data.str = '<html><head><title>'+
 			locals.title+
 			'</title></head><body><h1>TOC</h1>'+
-			data.str+
+			data.str+locals.script
 			'</body></html>'
 	}
 

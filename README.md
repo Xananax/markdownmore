@@ -1,7 +1,12 @@
 # Markdown-More
 
 Little additions on top of [markdown-js](https://github.com/evilstreak/markdown-js).  
-Comes with a little set of helpers to register filters easily.  
+Comes with a little set of helpers to register filters easily. Uses the ["Maruku"](https://github.com/bhollis/maruku/blob/master/docs/markdown_syntax.md) dialect by default, which means it supports:
+
+|tables | like | this|
+|-------|------|-----|
+| a     | b    | c   |
+
 
 ### API
 
@@ -69,11 +74,11 @@ Same as `makeJsonFilter`, but avoids the step of having to register the function
 
 You'll find a few examples in `example/filter.js`, namely to:
 
-  - turn "[\*]abcde" into checkboxes, [ ] into unticked checkboxes, and [#] into ticked *and* disabled checkboxes (as well as a handy function to sync checking of those boxes with the underlying markdown), while keeping your [links](#) intact. If a text immediatly follows a [x], it will be considered a label (as long as there is no space between them).
+  - turn "[\*]abcde" into checkboxes, [ ] into unticked checkboxes, and [#] into ticked *and* disabled checkboxes (as well as a handy function to sync checking of those boxes with the underlying markdown), while keeping your [links](#) intact. If a text immediatly follows a [x], it will be considered a label (as long as there is no space between them, like [ ]this). You'll also find in `checkboxes.js` two example functions to change your markup when a box is ticked in html (actual syncing of the markdown server-side is left as an exercise for the reader).
   - turn @string into mentions and #string into hashtags
   - turn line returns (`\r`,`\n`) into `<br>`
-  - turn -> and <- into arrows
-  - turn >45435kdfgfd into a link
+  - turn -> and <- into arrows -> sdfsdf
+  - turn |>45435kdfgfd into a link
   - create a table of contents automagically
   - Have a very simple mustache-type renderer that turns {{exampleVar}} into text, before rendering
   - And a very simple html wrapper, that wraps the whole result, after rendering.

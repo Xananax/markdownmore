@@ -1,12 +1,16 @@
 var markdown = require('../index')
 var additions = require('./filters')(markdown)
-var readme = require('fs').readFileSync(__dirname+'/../README.md',{encoding:'utf8'});
+var readFile = function(file){return require('fs').readFileSync(__dirname+'/'+file,{encoding:'utf8'});}
+var readme = readFile('../README.md');
+var readme_for_js = readme.replace(/"/g,'\\"').replace(/\n/g,'\\n');
+
 var md = markdown(readme,{
 	exampleVar:'(I am replaced)'
 ,	title:'Markdown-Additions Examples'
 ,	checkboxPrefix:'checkbox'
 ,	checkboxIds:0
 ,	minimumTOCLevel:3
+,	script: '<script>\n'+readFile('checkboxes.js').replace(/\/\*markdown_text\*\//,readme_for_js)+'\n</script>'
 });
 
 require('fs').writeFileSync(__dirname+'/generated-readme.html',md,{encoding:'utf8'});

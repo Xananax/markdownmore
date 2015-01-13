@@ -1,6 +1,6 @@
 {
   "name": "markdown-more",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Helpers for creating markdown-js filters",
   "main": "index.js",
   "directories": {
