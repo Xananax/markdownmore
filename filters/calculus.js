@@ -38,8 +38,9 @@ module.exports = function(markdown){
 	}
 
 	function parseChunk(e,locals){
-		if(!locals._m_stash){locals._m_stash = {};}
-		if(e.is.reference){e.value = (locals._m_stash[e.reference] && locals._m_stash[e.reference].value) || 0;}
+		if(!locals.markdown){locals.markdown={};}
+		if(!locals.markdown._m_stash){locals.markdown._m_stash = {};}
+		if(e.is.reference){e.value = (locals.markdown._m_stash[e.reference] && locals.markdown._m_stash[e.reference].value) || 0;}
 		if(e.is.expression){
 			e.value = e.value
 				.replace(mathMethodsRegexp,'Math.$1$2')
@@ -49,7 +50,7 @@ module.exports = function(markdown){
 			try{
 				eval('e.value='+e.value+';');
 			}
-			catch(e){}
+			catch(err){}
 		}
 		locals._m_stash[e.variable] = e;
 		return e.value+'';

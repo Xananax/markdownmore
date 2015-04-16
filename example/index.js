@@ -9,9 +9,17 @@ var readme_for_js = readme.replace(/"/g,'\\"').replace(/\n/g,'\\n');
 var md = markdown(readme,{
 	exampleVar:'(I am replaced)'
 ,	title:'Markdown-Additions Examples'
-,	checkboxPrefix:'checkbox'
-,	checkboxIds:0
-,	minimumTOCLevel:3
+,	markdown:{
+		checkbox:{
+			id_prefix:'checkbox'
+		,	class_prefix:'input-checkbox'
+		,	ids:0
+		}
+	,	mentions:{
+			class_prefix:''
+		}
+	,	minimumTOCLevel:3
+	}
 ,	script: '<script>\n'+readFile('checkboxes.js').replace(/\/\*markdown_text\*\//,readme_for_js)+'\n</script>'
 });
 

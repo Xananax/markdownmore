@@ -1,1 +1,1 @@
-module.exports = require('./lib/markdown.js')
+module.exports = require('./lib')
