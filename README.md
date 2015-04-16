@@ -81,11 +81,15 @@ var options = {
 }
 ```
 
+### LineBreaks
+add it with `require('makdown-more/filters/linebreaks')(markdown);`.  
+Just turns any linebreak into a newline, useful for markdown newbies that can't remember to add two spaces at the end.
+
 ### Embed
 add it with `require('makdown-more/filters/embed')(markdown);`.  
 Embed from many providers simply by having a url on it's own line. For example:
 https://www.youtube.com/watch?v=dZW5B_7xydI
-You don't have to include `http` in the beginning, and you can specify a size by pre-pending `560x320:` to the url:
+. Note that this is a newline in the original markdown file, not necessarily in your generated html (i.e, you don't have to add two spaces at the end of your lines). You don't have to include `http` in the beginning, and you can specify a size by pre-pending `560x320:` to the url:
 280x157:https://youtu.be/K8nrF5aXPlQ
 for the moment, only youtube and vimeo are supported. You may add your own providers:
 ```js

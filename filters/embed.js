@@ -50,7 +50,7 @@ module.exports = function(markdown){
 		}
 		for(n in options.providers){providers.push(n);}
 		providers = providers.join('|').replace('.','\.');
-		var seek = new RegExp('^(\d\d+x\d\d+:)?((?:https?:)\/\/(?:w+\.)?('+providers+')\/(.*?))\s?$','gi');
+		var seek = new RegExp('^(\d\d+x\d\d+:)?((?:https?:)\/\/(?:w+\.)?('+providers+')\/(.*?))\s|\n|$','gi');
 		data.str = data.str.replace(seek,function(total,size,url,provider,fragment){
 			var fn = options.providers[provider];
 			if(!fn){return url;}
