@@ -24,14 +24,19 @@ require('markdown-more/filters/arrows')(markdown);
 
 ## Usage
 
-### Options
+```js
+var markdown = require('markdown-more');
+var htmlText = markdown(markdownText,options);
+```
+
+For the options available, see below.
 
 ---
 
 ## Included Filters
 
 ### Icons
-add it with `require('makdown-more/filters/icons')(markdown);`.
+add it with `require('makdown-more/filters/icons')(markdown);`.  
 Replaces `(+)` with `<i class="fa fa-plus-circle"></i>`, `(-)` with `<i class="fa fa-minus-circle"></i>`, and so on. You can add icons, or even replace the template in case you don't use FontAwesome. Available options:
 ```js
 var options = {
@@ -51,7 +56,7 @@ var options = {
 ```
 
 ### Iframes
-add it with `require('makdown-more/filters/iframes')(markdown);`.
+add it with `require('makdown-more/filters/iframes')(markdown);`.  
 You can add iframes like so: 
 `iframe[//youtu.be/somestring]`
 That's all. You'll get the following markup:
@@ -77,7 +82,7 @@ var options = {
 ```
 
 ### Embed
-add it with `require('makdown-more/filters/embed')(markdown);`.
+add it with `require('makdown-more/filters/embed')(markdown);`.  
 Embed from many providers simply by having a url on it's own line. For example:
 https://www.youtube.com/watch?v=dZW5B_7xydI
 You don't have to include `http` in the beginning, and you can specify a size by pre-pending `560x320:` to the url:
@@ -100,7 +105,7 @@ var options:{
 ```
 
 ### Entities
-add it with `require('makdown-more/filters/entities')(markdown);`.
+add it with `require('makdown-more/filters/entities')(markdown);`.  
 Transforms `<-` and `->` into unicode `←` and `→`, `(c)` into `©`, and so on. Additionally, wraps the entity in a span with class `.entity.entity-X`, where "x" is the type of entity. You can add yours by changing the options:
 ```js
 var options = {
@@ -119,12 +124,13 @@ var options = {
 
 
 ### Checkboxes
-add it with `require('makdown-more/filters/checkboxes')(markdown);`.
+add it with `require('makdown-more/filters/checkboxes')(markdown);`.  
 Transforms [ ] and [x] into checkboxes. Any of the following characters are valid:
 - [ ]: Will create an empty checkbox
 - [x],[*],[✓],[✔],[☑]: Will create a checked checkbox
 - [×],[X],[✕],[☓]: Will create a disabled checkbox (these are not regular "x"'s)
 - [✖],[✗],[✘]: Will create checked *and* disabled checkboxes
+
 You can include a label for the checkbox like you would a markdown inline link: `[x](my label)`. Checkboxes take an id and a class, and labels take a class too (there's a span inside the label that also receives a class. You can specify the classes with the options below.
 *options*:
 ```js
@@ -147,15 +153,16 @@ var options = {
 ```
 
 ### Calculus
-add it with `require('makdown-more/filters/calculus')(markdown);`.
+add it with `require('makdown-more/filters/calculus')(markdown);`.  
 This transforms allows simple maths inline or over the document. any string of letters followed directly with an `=` and an expression will see the expression treated as math (spaces break the expression). Variables are retained throughout the document, so referencing them is possible.
 Examples:
 - a=3+1
 - b=cos(34)
 - c=PI
 - d=a+b-c
-- 
+ 
 The above will render as:
+
 - 4
 - -0.8485702747846051
 - 3.141592653589793
@@ -164,7 +171,7 @@ The above will render as:
 Add a final `!` to execute an operation without printing it. For example, `e=(d+1)!` will not show at all. I could print it later by writing `e=e`.
 
 ### Mentions and Hashtags
-add it with `require('makdown-more/filters/mentions-hashtags')(markdown);`.
+add it with `require('makdown-more/filters/mentions-hashtags')(markdown);`.  
 Any string of letters preceeded with `@` or with `#` will be wrapped in a span with class `mention` or `hashtag`. You can optionally specify a prefix for the classes:
 ```js
 var options = {
@@ -177,7 +184,7 @@ var options = {
 ```
 
 ### Templating
-add it with `require('makdown-more/filters/templating')(markdown);`.
+add it with `require('makdown-more/filters/templating')(markdown);`.  
 You can use your markdown as a simple templating engine by using mustache-like `{{` and `}}`. This is a very very simple templating engine and just replaces `{{variable}}` by what you've supplied in your `options.variable`. Supports functions: if your options have, for example:
 
 ```js
@@ -189,7 +196,8 @@ var options ={
 };
 ```
 
-Then the string `{{title}} adds number like so: {{helpers.add:1:2}}` will render as `My function adds numbers like so: 3`. Note: you can add your functions anywhere, they're on `helpers` in the example just to demonstrate that nested variables are possible.
+Then the string `{{title}} adds number like so: {{helpers.add:1:2}}` will render as `My function adds numbers like so: 3`.  
+Note: you can add your functions anywhere, they're on `helpers` in the example just to demonstrate that nested variables are possible.
 
 ## Options
 Here are the total options for all the filters above:
@@ -233,13 +241,13 @@ var options = {
 
 ### Table Of Contents
 This filter is chunked in two:
-First, include the part that add ids to all h1's:
-`require('makdown-more/filters/toc/first')(markdown);`.
+First, include the part that add ids to all h1's:  
+`require('makdown-more/filters/toc/first')(markdown);`.  
 After you've added all your filters, add the part that actually pre-pends the table of contents:
-`require('makdown-more/filters/toc/last')(markdown);`.
+`require('makdown-more/filters/toc/last')(markdown);`.  
 
 ### Page
-add it with `require('makdown-more/filters/page')(markdown);`.
+add it with `require('makdown-more/filters/page')(markdown);`.  
 This filter simply wraps your markdown in `<html>` and `<body>` tags to make it a valid html page.
 
 ---
