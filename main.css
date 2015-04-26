@@ -6,6 +6,9 @@ body{
     margin: 0 auto;
 	background:#fdfdfd;
 	color:#272727;
+	padding:4em 0;
+	margin:0 auto;
+	max-width:960px;
 }
 
 pre{font-size:.9em;}
@@ -23,8 +26,8 @@ h1,h2,h3,h4{color:#999;padding-left:1em;}
 
 p{padding:.5em 2em 0 2em;margin:0}
 
-hr{margin:2em auto 1em auto;}
-hr+hr{width:25%;}
+hr{margin:2em auto 1em auto;border:none;border-top: medium double #797979;color:#797979;width:80%;padding: 0;text-align: center;}
+hr:after {content: "///";display: inline-block;position: relative;top: -0.9em;font-size: 1.5em;padding: 0 0.25em;background: white;}
 
 /*** Example-specific stuff ***/
 #markdownRaw{width:30em;background:black;position:fixed;top:0;right:0;padding:1em;}
