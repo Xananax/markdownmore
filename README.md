@@ -3,6 +3,9 @@
 Little additions on top of [markdown-js](https://github.com/evilstreak/markdown-js).  
 Comes with a little set of helpers to register filters easily. Uses the "[Maruku](https://github.com/bhollis/maruku/blob/master/docs/markdown_syntax.md)" dialect by default, which means it supports some features on top of regular markdown, like tables or footnotes.
 
+[repo](https://github.com/Xananax/markdownmore)
+[examples](http://xananax.github.io/markdownmore)
+
 Makdown-more is intended as a more fully-featured version of markdown geared towards static site generation.
 
 if you don't want the filters but just the helper functions, instead of
@@ -234,9 +237,7 @@ var options = {
 
 examples:
 
-[ ] an empty checkbox
-[x] a checked checkbox
-[✓](another checked checkbox with a label)
+[ ] an empty checkbox, [x] a checked checkbox, and a [✓](checked) checkbox with a label
 
 ---
 
