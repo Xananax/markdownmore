@@ -1,7 +1,18 @@
+registered = false;
+
 module.exports = function(markdown){
 
+	if(registered){return false;}
+	registered = true;
+
 	var options = {
-		template:'<i class="fa fa-%%icon%%></i>'
+		class_prefix:'fa'
+	,	render:function(className,content){
+			return ['i'
+			,	{class:className}
+			,	['span',content]
+			];
+		}
 	,	characters:{
 			'+':'plus-circle'
 		,	'-':'minus-circle'
@@ -11,27 +22,33 @@ module.exports = function(markdown){
 		}
 	};
 
-	// replaces (+) with <i class="fa fa-plus-circle"></i>,
-	// (x) with <i class="fa fa-times"></i>, and so on
-	markdown.register('before',function(data,locals){
+	markdown.registerTokenFilter(
+		function(locals){
+			return locals.markdown.icons.regExp;
+		}
+	,	function tokenize(token){
+			var pre = this.markdown.icons.class;
+			var icons = options.characters;
+			var className = pre+(icons[token] || 'default');
+			var render = this.markdown.icons.render;
+			return render(className,token);
+		}
+	);
 
-		var additionalCharacters = markdown.getOpt(locals,['markdown','icons','characters'],false);
-		var tmpl = markdown.getOpt(locals,['markdown','icons','template'],template);
-		var chars = options.characters;
-		var charsString = [];
-		var n;
+	markdown.register('before',function(data,locals){
+		if(!locals.markdown){locals.markdown = {};}
+		if(!locals.markdown.icons){locals.markdown.icons = {};}
+		var class_prefix = locals.markdown.icons.class_prefix || options.class_prefix;
+		locals.markdown.icons.class = class_prefix+' '+class_prefix+'-';
+		locals.markdown.icons.render = locals.markdown.icons.render || options.render;
+		var additionalCharacters = locals.markdown.icons.characters;
 		if(additionalCharacters){
-			for(n in additionalCharacters){
-				chars[n] = additionalCharacters[n];
+			for(var n in additionalCharacters){
+				options.characters[n] = additionalCharacters[n];
 			}
 		}
-		for(n in chars){
-			charsString.push(n);
-		}
-		var seek = new RegExp('\(('+charsString.join('|')+')\)','g');
-		data.str = data.str.replace(seek,function(total,icon){
-			var i = chars[icon] || icon;
-			return tmpl.replace(/%%icon%%/,i);
-		});
+		var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
+		locals.markdown.icons.regExp = new RegExp('(?:\\(('+charsString+')\\))','g');
 	});
+
 }

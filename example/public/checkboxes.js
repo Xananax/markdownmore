@@ -1,4 +1,4 @@
-(function(md_text){
+sync_checkboxes = function(md_text){
 
 	/**
 	 * Syncs Checkboxes in an element with the markdown text
@@ -113,4 +113,4 @@
 
 
 	attachCheckEvent();
-})("/*markdown_text*/");
+};

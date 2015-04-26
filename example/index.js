@@ -1,32 +1,11 @@
-var markdown = require('../index')
+var markdown = require('../lib/markdown');
+var fs = require('fs');
+var readme = fs.readFileSync(__dirname+'/../README.md',{encoding:'utf8'});
+var locals = require('./locals')(readme);
+var server = require('./server');
+
 require('./filters')(markdown);
-require('./maths')(markdown);
+var md = markdown(readme,locals);
+fs.writeFileSync(__dirname+'/public/index.html',md,{encoding:'utf8'});
 
-var readFile = function(file){return require('fs').readFileSync(__dirname+'/'+file,{encoding:'utf8'});}
-var readme = readFile('../README.md');
-var readme_for_js = readme.replace(/"/g,'\\"').replace(/\n/g,'\\n');
-
-var md = markdown(readme,{
-	exampleVar:'(I am replaced)'
-,	title:'Markdown-Additions Examples'
-,	markdown:{
-		checkbox:{
-			id_prefix:'checkbox'
-		,	class_prefix:'input-checkbox'
-		,	ids:0
-		}
-	,	mentions:{
-			class_prefix:''
-		}
-	,	minimumTOCLevel:3
-	}
-,	script: '<script>\n'+readFile('checkboxes.js').replace(/\/\*markdown_text\*\//,readme_for_js)+'\n</script>'
-});
-
-require('fs').writeFileSync(__dirname+'/generated-readme.html',md,{encoding:'utf8'});
-
-require('http').createServer(function(req,res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.end(md);
-}).listen(3000);
-console.log('listening on 3000');
+server(3000);

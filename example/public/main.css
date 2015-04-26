@@ -1,0 +1,90 @@
+/*** Generic styles ****/
+body{
+	font-size:1em;
+    font-family: "Palatino Linotype",Palatino,Georgia,serif;
+    line-height: 1.5;
+    margin: 0 auto;
+	background:#fdfdfd;
+	color:#272727;
+}
+
+pre{font-size:.9em;}
+
+code{background:#ddd;}
+
+a:link,
+a:visited,
+a:active,
+a:hover{color:#990000;text-decoration:none;}
+
+a:hover{text-decoration:underline;}
+
+h1,h2,h3,h4{color:#999;padding-left:1em;}
+
+p{padding:.5em 2em 0 2em;margin:0}
+
+hr{margin:2em auto 1em auto;}
+hr+hr{width:25%;}
+
+/*** Example-specific stuff ***/
+#markdownRaw{width:30em;background:black;position:fixed;top:0;right:0;padding:1em;}
+#markdownRaw .hide{display:none;}
+#markdownRaw textarea{width:100%;height:100%;white-space:nowrap;overflow:auto;}
+
+/*** Icons ***/
+.fa{color:green;}
+.fa span{display:none;}
+.noFontAwesome .fa span{display:inline;}
+
+/*** iframes ***/
+.iframe{width:75%;padding-bottom:56.25%;display:block;position:relative;padding-top:1em;height:0;overflow:hidden;}
+.iframe iframe {position: absolute;top:0;left:0;width:100%;height:100%;}
+.iframe::after{color:white;background:#999;content:'';position:absolute;top:0;left:0;display:block;padding:.2em;}
+.iframe-dabblet::after{content:'from Dabblet.com'}
+
+/*** Wrap ***/
+.table-wrapper{width:75%;display:block;}
+.table-wrapper table{width:100%;}
+.table-wrapper table th{background:#999;color:#990000;}
+.table-wrapper table tr{background:beige;}
+.table-wrapper table tr:nth-child(even){background:#E0D5D5;}
+.table-wrapper table td,
+.table-wrapper table th{padding:.2em;}
+
+/*** embed ***/
+.embed{width:30%;padding-bottom:20%;display:block;position:relative;padding-top:1em;height:0;overflow:hidden;}
+.embed iframe {position: absolute;top:0;left:0;width:100%;height:100%;}
+.embed::after{color:white;background:#999;content:'';position:absolute;top:0;left:0;display:block;padding:.2em;}
+.embed-youtube::after{content:'from Youtube.com'}
+
+/*** entities ***/
+.entity{font-family:Arial,"Open Sans",sans-serif;font-size:1.3em;}
+
+/*** checkboxes ***/
+.input-checkbox-wrapper input{display:none;}
+.input-checkbox-wrapper label::before{background:black;color:white;content:' ';display:inline-block;width:1em;height:1em;margin-right:.1em;line-height:1em;}
+.input-checkbox-wrapper input:checked+label:before{content:'✔';}
+
+
+/*** mentions, hashtags ***/
+.mention span,.hashtag span{color:#999000}
+.mention em, .hashtag em{color:#999090}
+
+/*** table of contents ***/
+.toc{width:50%;margin: 0 auto;background:#F2EAEA;padding:1em;}
+.toc a:link,
+.toc a:visited,
+.toc a:hover,
+.toc a:active{color:#999090;}
+
+.toc .toc-element{color:#999090;}
+.toc .toc-1{margin-left:0;}
+.toc .toc-2{margin-left:1em;color:#BDAEAE;}
+.toc .toc-3{margin-left:2em;color:#D8C5C5;font-size:.95em;}
+
+.toc .toc-title{padding-top:0;font-size:1.5em;}
+
+/*** Calculus ***/
+
+.math{color:#B60000;font-style:italic;}
+.math-invalid{background:red;color:white;}

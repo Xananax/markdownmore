@@ -1,0 +1,695 @@
+<html><head><title>Markdown-More Examples</title><link rel="stylesheet" media="all" href="vendor/prism.css"></link><link rel="stylesheet" media="all" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"></link><link rel="stylesheet" media="all" href="main.css"></link></head><body><h1>Markdown-More Examples</h1><div class="toc"><h1 class="toc-title">Table of Contents</h1><ul class="toc-list"><li class="toc-element toc-2"><a class="toc-link" href="#usage">Usage</a></li><li class="toc-element toc-2"><a class="toc-link" href="#included-filters">Included Filters</a></li><li class="toc-element toc-3"><a class="toc-link" href="#icons">Icons</a></li><li class="toc-element toc-3"><a class="toc-link" href="#iframes">Iframes</a></li><li class="toc-element toc-3"><a class="toc-link" href="#wrap">Wrap</a></li><li class="toc-element toc-3"><a class="toc-link" href="#linebreaks">LineBreaks</a></li><li class="toc-element toc-3"><a class="toc-link" href="#headers">Headers</a></li><li class="toc-element toc-3"><a class="toc-link" href="#embed">Embed</a></li><li class="toc-element toc-3"><a class="toc-link" href="#entities">Entities</a></li><li class="toc-element toc-3"><a class="toc-link" href="#checkboxes">Checkboxes</a></li><li class="toc-element toc-3"><a class="toc-link" href="#mentions-and hashtags">Mentions and Hashtags</a></li><li class="toc-element toc-3"><a class="toc-link" href="#templating">Templating</a></li><li class="toc-element toc-2"><a class="toc-link" href="#additional-filters">Additional Filters</a></li><li class="toc-element toc-3"><a class="toc-link" href="#table-of contents">Table Of Contents</a></li><li class="toc-element toc-3"><a class="toc-link" href="#page">Page</a></li><li class="toc-element toc-3"><a class="toc-link" href="#calculus">Calculus</a></li><li class="toc-element toc-2"><a class="toc-link" href="#api">API</a></li><li class="toc-element toc-2"><a class="toc-link" href="#faq">FAQ</a></li><li class="toc-element toc-2"><a class="toc-link" href="#libraries-used">Libraries Used:</a></li><li class="toc-element toc-2"><a class="toc-link" href="#license">License</a></li></ul></div>
+
+<h1 id="markdown-more">Markdown-More</h1>
+
+<p>Little additions on top of <a href="https://github.com/evilstreak/markdown-js">markdown-js</a>.<br/>Comes with a little set of helpers to register filters easily. Uses the &quot;<a href="https://github.com/bhollis/maruku/blob/master/docs/markdown_syntax.md">Maruku</a>&quot; dialect by default, which means it supports some features on top of regular markdown, like tables or footnotes.  </p>
+
+<p>Makdown-more is intended as a more fully-featured version of markdown geared towards static site generation.  </p>
+
+<p>if you don&#39;t want the filters but just the helper functions, instead of<br/><pre class="language-javascript"><code>var markdown = include(&#39;markdown-more&#39;)  
+</code></pre><code></code>  </p>
+
+<p>do  </p>
+
+<p><pre class="language-javascript"><code>var markdown = include(&#39;markdown-more/markdown&#39;)  
+</code></pre><code></code>  </p>
+
+<p>then you can include the filters you want:  </p>
+
+<p><pre class="language-javascript"><code>require(&#39;markdown-more/filters/arrows&#39;)(markdown);  
+</code></pre><code></code>  </p>
+
+<hr/>
+
+<h2 id="usage">Usage</h2>
+
+<p><pre class="language-javascript"><code>var markdown = require(&#39;markdown-more&#39;);  
+var htmlText = markdown(markdownText,options);  
+</code></pre><code></code>  </p>
+
+<p>For the options available, see below. To check the example (this very page, rendered with markdown-more), navigate to the <code>/example</code> directory and run <code>node index.js</code>, then open <code>localhost:3000</code> in your browser.<br/>There is a full run-down of all options available in <code>example/options.js</code>  </p>
+
+<hr/>
+
+<h2 id="included-filters">Included Filters</h2>
+
+<h3 id="icons">Icons</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/icons&#39;)(markdown);</code>.<br/>Replaces <code>(+)</code> with <code>&lt;i class=&quot;fa fa-plus-circle&quot;&gt;&lt;span&gt;+&lt;/span&gt;&lt;/i&gt;</code>, <code>(-)</code> with <code>&lt;i class=&quot;fa fa-minus-circle&quot;&gt;&lt;span&gt;-&lt;/span&gt;&lt;/i&gt;</code>, and so on. You can add your own icons, or even replace the template in case you don&#39;t use FontAwesome. Default options:  </p>
+
+<p><pre class="language-javascript"><code>var options = {  
+    markdown:{    
+        class_prefix:&#39;fa&#39;  
+    ,   render:function(className,content){  
+            return [&#39;i&#39;,{class:className},[&#39;span&#39;,content]];  
+        }  
+    ,   characters:{  
+            &#39;+&#39;:&#39;plus-circle&#39;  
+        ,   &#39;-&#39;:&#39;minus-circle&#39;  
+        ,   &#39;#&#39;:&#39;check&#39;  
+        ,   &#39;x&#39;:&#39;times&#39;  
+        ,   &#39;?&#39;:&#39;question&#39;  
+        }  
+    }  
+};  
+</code></pre><code></code>  </p>
+
+<p>examples:  </p>
+
+<ul><li>this will be translated to a <i class="fa fa-plus-circle"><span>+</span></i> &quot;+&quot;  </li><li>this will be a fontAwesome <i class="fa fa-question"><span>?</span></i> questionmark  </li></ul>
+
+<hr/>
+
+<h3 id="iframes">Iframes</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/iframes&#39;)(markdown);</code>.<br/>You can add iframes like so: 
+<code>[iframe //youtu.be/somestring]</code><br/>That&#39;s all. You&#39;ll get the following markup:<br/><pre class="language-markup"><code>&lt;div class=&quot;iframe iframe-youtube&quot;&gt;  
+    &lt;iframe src=&quot;//youtu.be/somestring&quot; frameborder=&quot;0&quot; width=&quot;400px&quot; height=&quot;300px&quot;&gt;&lt;/iframe&gt;  
+&lt;/div&gt;  
+</code></pre><code></code><br/><em>Note: .com, .org, .net extensions will be removed from the classname. So <code>youtube.com</code> will become <code>.iframe-youtube</code>, but <code>something.io</code> will become <code>.iframe-somethingio</code>.</em>  </p>
+
+<p>You can specify width and height, as well as border, by adding &quot;|&quot; separated options: <code>[iframe url|500x600|0]</code>  </p>
+
+<p>You can set default options:<br/><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        iframe:{  
+            border:0  
+        ,   width:400  
+        ,   height:300  
+        ,   class_prefix:&#39;iframe&#39;  
+        }  
+    }  
+}  
+</code></pre><code></code>  </p>
+
+<p>examples:  </p>
+
+<p><span class="iframe iframe-dabblet"><iframe src="http://dabblet.com/gist/8333352" width="540px" height="480px" frameborder="0"></iframe></span>  </p>
+
+<hr/>
+
+<h3 id="wrap">Wrap</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/wrap&#39;)(markdown);</code>. 
+Just wraps elements in <code>span</code> wrappers. You can use it to wrap all <code>&lt;a/&gt;</code> in <code>span.link</code> for example.<br/>To use, just set an array of elements to wrap:  </p>
+
+<p><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        wrap:{  
+            class_suffix:&#39;-wrapper&#39;  
+        ,   wrappers:[&#39;link&#39;,&#39;table&#39;,&#39;iframe&#39;]  
+        }  
+    }  
+};  
+</code></pre><code></code>  </p>
+
+<p>So this table:  </p>
+
+<span class="table-wrapper"><table><thead><tr><th>header 1</th><th>header 2</th></tr></thead><tbody><tr><td>content</td><td>content</td></tr><tr><td>content</td><td>content</td></tr><tr><td>content</td><td>content</td></tr></tbody></table></span>
+
+<p>Would be wrapped in a <code>span.table-wrapper</code>  </p>
+
+<hr/>
+
+<h3 id="linebreaks">LineBreaks</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/linebreaks&#39;)(markdown);</code>.<br/>Just turns any linebreak into a newline, useful for markdown newbies that can&#39;t remember to add two spaces at the end.  </p>
+
+<hr/>
+
+<h3 id="headers">Headers</h3>
+
+<p>This simply adds an id for each header, which allows for in-page links. Ids are generated from the text itself: spaces are replaced with &quot;-&quot;, special characters are removed, and the text gets lowercased.  </p>
+
+<p>Default options:  </p>
+
+<p><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        id_prefix:&#39;&#39; //gets pre-pended to the ids  
+    ,   level:3 //which is the maximal level of header to include  
+    }  
+};  
+</code></pre><code></code>  </p>
+
+<hr/>
+
+<h3 id="embed">Embed</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/embed&#39;)(markdown);</code>.<br/>Embed from many providers simply by having a url on it&#39;s own line. For example:<br/><span class="embed embed-youtube"><iframe height="315px" width="560px" allowfullscreen="allowfullscreen" src="//www.youtube.com/embed/dZW5B_7xydI" frameborder="0"></iframe></span><br/>. Note that this is a newline in the original markdown file, not necessarily in your generated html (i.e, you don&#39;t have to add two spaces at the end of your lines). You don&#39;t have to include <code>http</code> in the beginning, and you can specify a size by pre-pending <code>560x320:</code> to the url:<br/><span class="embed embed-youtube"><iframe src="//www.youtube.com/embed/K8nrF5aXPlQ" frameborder="0" height="157px" width="280px" allowfullscreen="allowfullscreen"></iframe></span><br/>for the moment, only youtube and vimeo are supported. You may add your own providers:<br/><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        embed:{  
+            class_prefix:&#39;embed&#39;//className is &quot;embed embed-someprovider&quot;  
+        ,   providers:{  
+                &#39;someprovider.org&#39;:function(frag,width,height){  
+                    //frag is whatever comes after &quot;somprovider.org/&quot;  
+                }  
+            }  
+        }  
+    }  
+}  
+</code></pre><code></code>  </p>
+
+<p>iframes are inside a <code>&lt;span&gt;</code> element of classes <code>.embed.embed-provider</code>, where <code>provider</code> is <code>youtube</code> or <code>vimeo</code>  </p>
+
+<hr/>
+
+<h3 id="entities">Entities</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/entities&#39;)(markdown);</code>.<br/>Transforms <code>&lt;-</code> and <code>-&gt;</code> into unicode <code>←</code> and <code>→</code>, <code>(c)</code> into <code>©</code>, and so on. Additionally, wraps the entity in a span with class <code>.entity.entity-X</code>, where &quot;x&quot; is the type of entity. You can add yours by changing the options:<br/><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        entities:{  
+            template:&#39;&lt;span class=&quot;entity entity-%%icon%%&gt;%%content%%&lt;/span&gt;&#39;  
+        ,   characters:{  
+                &#39;:\)&#39;:[&#39;smiley&#39;,&#39;☺&#39;] //pass the class name, then the entity in an array. 
+                                     // Escape regex characters  
+            ,   &#39;&gt;_&lt;&#39;:[&#39;disapprove&#39;,&#39;ಠ_ಠ&#39;]  
+            }  
+        }  
+    }  
+}  
+</code></pre><code></code>  </p>
+
+<p>examples:  </p>
+
+<ul><li><span class="entity entity-rightArr"><span>→</span></span> will be an arrow  </li><li><span class="entity entity-copyright"><span>©</span></span> will be a copyright sign  </li></ul>
+
+<hr/>
+
+<h3 id="checkboxes">Checkboxes</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/checkboxes&#39;)(markdown);</code>.<br/>Transforms <code>[ ]</code> and <code>[x]</code> into checkboxes. Any of the following characters are valid:<br/>- <code>[ ]</code>: Will create an empty checkbox<br/>- <code>[x]</code>,<code>[*]</code>,<code>[✓]</code>,<code>[✔]</code>,<code>[☑]</code>: Will create a checked checkbox<br/>- <code>[×]</code>,<code>[X]</code>,<code>[✕]</code>,<code>[☓]</code>: Will create a disabled checkbox (these are not regular &quot;x&quot;&#39;s)<br/>- <code>[✖]</code>,<code>[✗]</code>,<code>[✘]</code>: Will create checked <em>and</em> disabled checkboxes  </p>
+
+<p>You can include a label for the checkbox like you would a markdown inline link: <code>[x](my label)</code>. Checkboxes take an id and a class, and labels take a class too (there&#39;s a span inside the label that also receives a class. You can specify the classes with the options below.<br/><em>options</em>:<br/><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        checkbox:{  
+            id_prefix:&#39;checkbox&#39; // checkboxes will have ids &#39;checkbox0&#39;, &#39;checkbox1&#39; and so on  
+        ,   class_prefix:&#39;input-checkbox&#39; //checkboxes will have class &#39;input-checkbox&#39;, 
+                                          // labels will be &#39;input-checkbox-label&#39;  
+                                          // spans in labels will be &#39;input-checkbox-label-text&#39;  
+        ,   ids:0 // checkbox id counting will start at 0  
+                  // this may be useful if you render several markdown blocks on the same page  
+                  // And don&#39;t want repeating ids  
+                  // Additionally, this number will be the checkboxe&#39;s tab index  
+                  // the id number is changed in the object itself, so just read it 
+                  // back from your options object to get the last used id  
+        }  
+    }  
+};  
+</code></pre><code></code>  </p>
+
+<p>examples:  </p>
+
+<p><label id="checkbox0-wrapper" for="checkbox0" class="input-checkbox-wrapper"><input type="checkbox" class="input-checkbox" id="checkbox0"></input><label id="checkbox0-label" for="checkbox0" class="input-checkbox-label-wrapper"></label></label> an empty checkbox<br/><label id="checkbox1-wrapper" for="checkbox1" class="input-checkbox-wrapper"><input type="checkbox" class="input-checkbox" id="checkbox1" checked=""></input><label id="checkbox1-label" for="checkbox1" class="input-checkbox-label-wrapper"></label></label> a checked checkbox<br/><label id="checkbox2-wrapper" for="checkbox2" class="input-checkbox-wrapper"><input type="checkbox" class="input-checkbox" id="checkbox2" checked="" value="another checked checkbox with a label"></input><label id="checkbox2-label" for="checkbox2" class="input-checkbox-label-wrapper"><span class="input-checkbox-label-text">another checked checkbox with a label</span></label></label>  </p>
+
+<hr/>
+
+<h3 id="mentions-and hashtags">Mentions and Hashtags</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/mentions-hashtags&#39;)(markdown);</code>.<br/>Any string of letters preceeded with <code>@</code> or with <code>#</code> will be wrapped in a span with class <code>mention</code> or <code>hashtag</code>. You can optionally specify a prefix for the classes:<br/><pre class="language-javascript"><code>var options = {  
+    markdown:{  
+        mentions:{  
+            class_prefix:&#39;&#39;  
+        }  
+    }  
+};  
+</code></pre><code></code>  </p>
+
+<p>examples:  </p>
+
+<p>hello <a class="mention" href="#/mentions/someone"><em>@</em><span>someone</span></a>, let&#39;s tag this <a class="hashtag" href="#/hashtags/awesome"><em>#</em><span>awesome</span></a>  </p>
+
+<hr/>
+
+<h3 id="templating">Templating</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/templating&#39;)(markdown);</code>.<br/>You can use your markdown as a simple templating engine by using mustache-like <code>{{</code> and <code>}}</code>. This is a very very simple templating engine and just replaces <code>undefined</code> by what you&#39;ve supplied in your <code>options.variable</code>. Supports functions: if your options have, for example:  </p>
+
+<p><pre class="language-javascript"><code>var options ={  
+    title:&#39;My function&#39;  
+,   helpers:{  
+        add:function(a,b){return a+b}  
+    }  
+};  
+</code></pre><code></code>  </p>
+
+<p>Then the string <code>Markdown-More Examples adds number like so: 3</code> will render as <code>My function adds numbers like so: 3</code>.<br/>Note: you can add your functions anywhere, they&#39;re on <code>helpers</code> in the example just to demonstrate that nested variables are possible.<br/>Templating runs prior to everything else, and does apply everywhere (other filters do not work inside <code>backticks</code> for example).  </p>
+
+<hr/>
+
+<h2 id="additional-filters">Additional Filters</h2>
+
+<h3 id="table-of contents">Table Of Contents</h3>
+
+<p>This filter generates an automatic table of contents and inserts it at the top of the document.<br/>Requires the &quot;headers&quot; filter.<br/>Available options:  </p>
+
+<p><pre class="language-javascript"><code>var options = 
+    markdown:{  
+        level:3 //minimum level of header  
+    ,   class_prefix:&#39;toc&#39; //prefixed to classes used in the table of contents  
+    ,   title:&#39;Table of Contents&#39; //will show as an h1 at the top of the table  
+    }  
+}  
+</code></pre><code></code>  </p>
+
+<hr/>
+
+<h3 id="page">Page</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/page&#39;)(markdown);</code>.<br/>This filter simply wraps your markdown in <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code> tags to make it a valid html page.  </p>
+
+<hr/>
+
+<h3 id="calculus">Calculus</h3>
+
+<p>add it with <code>require(&#39;makdown-more/filters/calculus&#39;)(markdown);</code>.<br/>This transforms allows simple maths inline or over the document. any string of letters followed directly with an <code>=</code> and an expression enclosed in <code>(</code> and <code>)</code> will see the expression treated as math (spaces break the expression). Variables are retained throughout the document, so referencing them is possible.<br/>Feel free to provide a new scope or to add variables in scope by setting the <code>locals.markdown.calculus</code> object.  </p>
+
+<p>Examples:  </p>
+
+<ul><li>let&#39;s say <span class="math">a = 4</span>  </li><li>and <span class="math">b = -0.8485702747846051</span>  </li><li>and c will not render   </li><li>and this line  will not render either  </li><li>this will just print a result <span class="math">33.649837071625605</span>  </li><li>This is invalid: <span class="math math-invalid" data-error="SyntaxError: Value expected (char 8)">e = ru(^9)</span>  </li></ul>
+
+<p>The above will render as:  </p>
+
+<ul><li>let&#39;s say a = 4  </li><li>and b = -0.8485702747846051  </li><li>and c will not render  </li><li>and this line will not render either  </li><li>this will just print a result 33.649837071625605  </li><li>This is invalid: e = ru(^9)  </li></ul>
+
+<p>Add a final <code>!</code> to execute an operation without printing it. For example, <code>e=(d+1)!</code> will not show at all. I could print it later by writing <code>=(e)</code>.  </p>
+
+<hr/>
+
+<h2 id="api">API</h2>
+
+<h4>Markdown(string<shortcode ref=",locals" original="[,locals]">,locals</shortcode>)</h4>
+
+<p>equivalent to the original <code>markdown.toHTML()</code>, but goes through all the filters before rendering. <code>locals</code> is anything you want to pass to your functions.  </p>
+
+<p>There there is a bunch of helper functions to register filters, but they aren&#39;t going to be documented here right now. Check the example filters, they should provide with most use cases.  </p>
+
+<hr/>
+
+<h2 id="faq">FAQ</h2>
+
+<h4>Is it fast?</h4>
+
+<p>Nah.  </p>
+
+<h4>Is is stable?</h4>
+
+<p>No  </p>
+
+<h4>Is it tested?</h4>
+
+<p>Tests are being written, but for the time being there aren&#39;t any  </p>
+
+<h4>Aren&#39;t you re-inventing the wheel?</h4>
+
+<p>You mean, why not just write HTML? Or use BBCode or something similar? Well I happen to like markdown, a lot. I use it for everything. It is just a bit lacking for creating slightly complex pages. So I did this. If you don&#39;t like it, don&#39;t use it.  </p>
+
+<hr/>
+
+<h2 id="libraries-used">Libraries Used:</h2>
+
+<p>Markdown-mode is built on top of <a href="https://github.com/evilstreak/markdown-js">markdown-js</a>, and uses <a href="http://mathjs.org/">MathJs</a> for the calculus filter.<br/>The examples uses <shortcode label="prismjs.com">prismjs</shortcode> and <a href="http://fortawesome.github.io/Font-Awesome/">fontAwesome</a>.  </p>
+
+<hr/>
+
+<h2 id="license">License</h2>
+
+<p>Released under the MIT license.  </p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:  </p>
+
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.  </p>
+
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p><div id="markdownRaw"><a href="#" class="toggler">Show Raw Markdown</a><div class="togglee"><textarea id="markdownText" cols="55" rows="20">#Markdown-More
+
+Little additions on top of [markdown-js](https://github.com/evilstreak/markdown-js).  
+Comes with a little set of helpers to register filters easily. Uses the "[Maruku](https://github.com/bhollis/maruku/blob/master/docs/markdown_syntax.md)" dialect by default, which means it supports some features on top of regular markdown, like tables or footnotes.
+
+Makdown-more is intended as a more fully-featured version of markdown geared towards static site generation.
+
+if you don't want the filters but just the helper functions, instead of
+```js
+var markdown = include('markdown-more')
+```
+
+do
+
+```js
+var markdown = include('markdown-more/markdown')
+```
+
+then you can include the filters you want:
+
+```js
+require('markdown-more/filters/arrows')(markdown);
+```
+
+---
+
+## Usage
+
+```javascript
+var markdown = require('markdown-more');
+var htmlText = markdown(markdownText,options);
+```
+
+For the options available, see below. To check the example (this very page, rendered with markdown-more), navigate to the `/example` directory and run `node index.js`, then open `localhost:3000` in your browser.
+There is a full run-down of all options available in `example/options.js`
+
+---
+
+## Included Filters
+
+### Icons
+add it with `require('makdown-more/filters/icons')(markdown);`.  
+Replaces `(+)` with `<i class="fa fa-plus-circle"><span>+</span></i>`, `(-)` with `<i class="fa fa-minus-circle"><span>-</span></i>`, and so on. You can add your own icons, or even replace the template in case you don't use FontAwesome. Default options:
+
+```javascript
+var options = {
+    markdown:{    
+        class_prefix:'fa'
+    ,   render:function(className,content){
+            return ['i',{class:className},['span',content]];
+        }
+    ,   characters:{
+            '+':'plus-circle'
+        ,   '-':'minus-circle'
+        ,   '#':'check'
+        ,   'x':'times'
+        ,   '?':'question'
+        }
+    }
+};
+```
+
+examples:
+
+- this will be translated to a (+) "+"
+- this will be a fontAwesome (?) questionmark
+
+---
+
+### Iframes
+add it with `require('makdown-more/filters/iframes')(markdown);`.  
+You can add iframes like so: 
+`[iframe //youtu.be/somestring]`
+That's all. You'll get the following markup:
+```html
+<div class="iframe iframe-youtube">
+    <iframe src="//youtu.be/somestring" frameborder="0" width="400px" height="300px"></iframe>
+</div>
+```
+*Note: .com, .org, .net extensions will be removed from the classname. So `youtube.com` will become `.iframe-youtube`, but `something.io` will become `.iframe-somethingio`.*
+
+You can specify width and height, as well as border, by adding "|" separated options: `[iframe url|500x600|0]`
+
+You can set default options:
+```javascript
+var options = {
+    markdown:{
+        iframe:{
+            border:0
+        ,   width:400
+        ,   height:300
+        ,   class_prefix:'iframe'
+        }
+    }
+}
+```
+
+examples:
+
+[iframe http://dabblet.com/gist/8333352|540x480]
+
+---
+
+### Wrap
+add it with `require('makdown-more/filters/wrap')(markdown);`. 
+Just wraps elements in `span` wrappers. You can use it to wrap all `<a/>` in `span.link` for example.
+To use, just set an array of elements to wrap:
+
+```js
+var options = {
+    markdown:{
+        wrap:{
+            class_suffix:'-wrapper'
+        ,   wrappers:['link','table','iframe']
+        }
+    }
+};
+```
+
+So this table:
+
+| header 1 | header 2 |
+|----------|----------|
+| content  | content  |
+| content  | content  |
+| content  | content  |
+
+Would be wrapped in a `span.table-wrapper`
+
+---
+
+### LineBreaks
+add it with `require('makdown-more/filters/linebreaks')(markdown);`.  
+Just turns any linebreak into a newline, useful for markdown newbies that can't remember to add two spaces at the end.
+
+---
+
+### Headers
+This simply adds an id for each header, which allows for in-page links. Ids are generated from the text itself: spaces are replaced with "-", special characters are removed, and the text gets lowercased.
+
+Default options:
+
+```javascript
+var options = {
+    markdown:{
+        id_prefix:'' //gets pre-pended to the ids
+    ,   level:3 //which is the maximal level of header to include
+    }
+};
+```
+
+---
+
+### Embed
+add it with `require('makdown-more/filters/embed')(markdown);`.  
+Embed from many providers simply by having a url on it's own line. For example:
+https://www.youtube.com/watch?v=dZW5B_7xydI
+. Note that this is a newline in the original markdown file, not necessarily in your generated html (i.e, you don't have to add two spaces at the end of your lines). You don't have to include `http` in the beginning, and you can specify a size by pre-pending `560x320:` to the url:
+280x157:https://youtu.be/K8nrF5aXPlQ
+for the moment, only youtube and vimeo are supported. You may add your own providers:
+```javascript
+var options = {
+    markdown:{
+        embed:{
+            class_prefix:'embed'//className is "embed embed-someprovider"
+        ,   providers:{
+                'someprovider.org':function(frag,width,height){
+                    //frag is whatever comes after "somprovider.org/"
+                }
+            }
+        }
+    }
+}
+```
+
+iframes are inside a `<span>` element of classes `.embed.embed-provider`, where `provider` is `youtube` or `vimeo`
+
+
+---
+
+### Entities
+add it with `require('makdown-more/filters/entities')(markdown);`.  
+Transforms `<-` and `->` into unicode `←` and `→`, `(c)` into `©`, and so on. Additionally, wraps the entity in a span with class `.entity.entity-X`, where "x" is the type of entity. You can add yours by changing the options:
+```javascript
+var options = {
+    markdown:{
+        entities:{
+            template:'<span class="entity entity-%%icon%%>%%content%%</span>'
+        ,   characters:{
+                ':\)':['smiley','☺'] //pass the class name, then the entity in an array. 
+                                     // Escape regex characters
+            ,   '>_<':['disapprove','ಠ_ಠ']
+            }
+        }
+    }
+}
+```
+
+examples:
+
+- -> will be an arrow
+- (c) will be a copyright sign
+
+---
+
+### Checkboxes
+add it with `require('makdown-more/filters/checkboxes')(markdown);`.  
+Transforms `[ ]` and `[x]` into checkboxes. Any of the following characters are valid:
+- `[ ]`: Will create an empty checkbox
+- `[x]`,`[*]`,`[✓]`,`[✔]`,`[☑]`: Will create a checked checkbox
+- `[×]`,`[X]`,`[✕]`,`[☓]`: Will create a disabled checkbox (these are not regular "x"'s)
+- `[✖]`,`[✗]`,`[✘]`: Will create checked *and* disabled checkboxes
+
+You can include a label for the checkbox like you would a markdown inline link: `[x](my label)`. Checkboxes take an id and a class, and labels take a class too (there's a span inside the label that also receives a class. You can specify the classes with the options below.
+*options*:
+```javascript
+var options = {
+    markdown:{
+        checkbox:{
+            id_prefix:'checkbox' // checkboxes will have ids 'checkbox0', 'checkbox1' and so on
+        ,   class_prefix:'input-checkbox' //checkboxes will have class 'input-checkbox', 
+                                          // labels will be 'input-checkbox-label'
+                                          // spans in labels will be 'input-checkbox-label-text'
+        ,   ids:0 // checkbox id counting will start at 0
+                  // this may be useful if you render several markdown blocks on the same page
+                  // And don't want repeating ids
+                  // Additionally, this number will be the checkboxe's tab index
+                  // the id number is changed in the object itself, so just read it 
+                  // back from your options object to get the last used id
+        }
+    }
+};
+```
+
+examples:
+
+[ ] an empty checkbox
+[x] a checked checkbox
+[✓](another checked checkbox with a label)
+
+---
+
+### Mentions and Hashtags
+add it with `require('makdown-more/filters/mentions-hashtags')(markdown);`.  
+Any string of letters preceeded with `@` or with `#` will be wrapped in a span with class `mention` or `hashtag`. You can optionally specify a prefix for the classes:
+```javascript
+var options = {
+    markdown:{
+        mentions:{
+            class_prefix:''
+        }
+    }
+};
+```
+
+examples:
+
+hello @someone, let's tag this #awesome
+
+---
+
+### Templating
+add it with `require('makdown-more/filters/templating')(markdown);`.  
+You can use your markdown as a simple templating engine by using mustache-like `{{` and `}}`. This is a very very simple templating engine and just replaces `{{variable}}` by what you've supplied in your `options.variable`. Supports functions: if your options have, for example:
+
+```javascript
+var options ={
+    title:'My function'
+,   helpers:{
+        add:function(a,b){return a+b}
+    }
+};
+```
+
+Then the string `{{title}} adds number like so: {{helpers.add(1,2)}}` will render as `My function adds numbers like so: 3`.  
+Note: you can add your functions anywhere, they're on `helpers` in the example just to demonstrate that nested variables are possible.
+Templating runs prior to everything else, and does apply everywhere (other filters do not work inside `backticks` for example).
+
+---
+
+## Additional Filters
+
+### Table Of Contents
+This filter generates an automatic table of contents and inserts it at the top of the document.
+Requires the "headers" filter.
+Available options:
+
+```javascript
+var options = 
+    markdown:{
+        level:3 //minimum level of header
+    ,   class_prefix:'toc' //prefixed to classes used in the table of contents
+    ,   title:'Table of Contents' //will show as an h1 at the top of the table
+    }
+}
+```
+
+---
+
+### Page
+add it with `require('makdown-more/filters/page')(markdown);`.  
+This filter simply wraps your markdown in `<html>` and `<body>` tags to make it a valid html page.
+
+---
+
+### Calculus
+add it with `require('makdown-more/filters/calculus')(markdown);`.  
+This transforms allows simple maths inline or over the document. any string of letters followed directly with an `=` and an expression enclosed in `(` and `)` will see the expression treated as math (spaces break the expression). Variables are retained throughout the document, so referencing them is possible.
+Feel free to provide a new scope or to add variables in scope by setting the `locals.markdown.calculus` object.
+
+Examples:
+
+- let's say a=(3+1)
+- and b=(cos(34))
+- and c will not render c=(PI)!
+- and this line d=(5.8^2)! will not render either
+- this will just print a result =(a+b-c+d)
+- This is invalid: e=(ru(^9))
+ 
+The above will render as:
+
+- let's say a = 4
+- and b = -0.8485702747846051
+- and c will not render
+- and this line will not render either
+- this will just print a result 33.649837071625605
+- This is invalid: e = ru(^9)
+
+Add a final `!` to execute an operation without printing it. For example, `e=(d+1)!` will not show at all. I could print it later by writing `=(e)`.
+
+---
+
+## API
+
+#### Markdown(string[,locals])
+equivalent to the original `markdown.toHTML()`, but goes through all the filters before rendering. `locals` is anything you want to pass to your functions.
+
+There there is a bunch of helper functions to register filters, but they aren't going to be documented here right now. Check the example filters, they should provide with most use cases.
+
+---
+
+## FAQ
+
+#### Is it fast?
+Nah.
+
+#### Is is stable?
+No
+
+#### Is it tested?
+Tests are being written, but for the time being there aren't any
+
+#### Aren't you re-inventing the wheel?
+You mean, why not just write HTML? Or use BBCode or something similar? Well I happen to like markdown, a lot. I use it for everything. It is just a bit lacking for creating slightly complex pages. So I did this. If you don't like it, don't use it.
+
+---
+
+## Libraries Used:
+
+Markdown-mode is built on top of [markdown-js](https://github.com/evilstreak/markdown-js), and uses [MathJs](http://mathjs.org/) for the calculus filter.
+The examples uses [prismjs](prismjs.com) and [fontAwesome](http://fortawesome.github.io/Font-Awesome/).
+
+
+---
+
+## License
+
+Released under the MIT license.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</textarea></div></div><script src="vendor/prism.js"></script><script src="//code.jquery.com/jquery-1.11.2.min.js"></script><script src="checkboxes.js"></script><script src="main.js"></script></body></html>

@@ -1,66 +1,106 @@
+registered = false;
+
 module.exports = function(markdown){
+
+	if(registered){return false;}
+	registered = true;
 
 	var options = {
 		class_prefix:'embed'
 	,	providers:{
-			'youtube.com':function(frag,className,w,h){
+			'youtube.com':function(frag,w,h){
 				frag = frag.split('?');
 				var i=0,l=frag.length;
-				while(i < frag.length && !url && !/^v=/.test(frag[i])){
+				while(i < l && !url && !/^v=/.test(frag[i])){
 					i++;
 				}
 				var url = frag[i];
 				if(!url){return false;}
+				url = url.replace(/v=/,'');
 				w = w || 560;
 				h = h || 315;
-				return ('<div class="'+className+'">'+
-					'<iframe src="http://www.youtube.com/embed/'+url+'" frameborder="0" height="'+h+'px" width="'+w+'px" allowfullscreen></iframe>'+
-				'</div>');
+				//return [];
+				return ([
+					'iframe'
+				,	{
+						height:h+'px'
+					,	width:w+'px'
+					,	allowfullscreen:'allowfullscreen'
+					,	src:'//www.youtube.com/embed/'+url
+					,	frameborder:'0'
+					}
+				]);
 			}
-		,	'youtu.be':function(frag,className,w,h){
+		,	'youtu.be':function(frag,w,h){
 				url = frag.split('?').shift();
 				w = w || 560;
 				h = h || 315;
-				return ('<div class="'+className+'">'+
-					'<iframe src="http://www.youtube.com/embed/'+url+'" frameborder="0" height="'+h+'px" width="'+w+'px" allowfullscreen></iframe>'+
-				'</div>')
-				;
+				return ([
+					'iframe'
+				,	{
+						src:'//www.youtube.com/embed/'+url
+					,	frameborder:'0'
+					,	height:h+'px'
+					,	width:w+'px'
+					,	allowfullscreen:'allowfullscreen'
+					}
+				]);
 			}
-		,	'vimeo.com':function(frag,className,w,h){
+		,	'vimeo.com':function(frag,w,h){
 				var url = frag.split('/').pop();
 				w = w || 281;
 				h = h || 500;
-				return ('<div class="'+className+'">'+
-					'<iframe src="http://player.vimeo.com/video/'+url+'" frameborder="0" height="'+h+'px" width="'+w+'px"  webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'+
-				'</div>')
-				;
+				return ([
+					'iframe'
+				,	{	
+						src:'//player.vimeo.com/video/'+url
+					,	frameborder:'0'
+					,	height:h+'px'
+					,	width:w+'px'
+					,	allowfullscreen:'allowfullscreen'
+					,	webkitallowfullscreen:'webkitallowfullscreen'
+					,	mozallowfullscreen:'mozallowfullscreen'
+					}
+				]);
 			}
 		}
 	}
 
-	function embeds(data,locals){
+	markdown.register('before',function embeds(data,locals){
+		if(!locals.markdown){locals.markdown={};}
+		if(!locals.markdown.embed){locals.markdown.embed = {};}
+		var pre = locals.markdown.embed.class_prefix || options.class_prefix;
+		locals.markdown.embed.class = pre+' '+pre+'-';
 		var providers = [];
-		var additionalProviders = markdown.getOpt(locals,['markdown','embed','providers'],false);
-		var pre = markdown.getOpt(locals,['markdown','embed','class_prefix'],options.class_prefix);
+		var additionalProviders = locals.markdown.embed.providers;
 		var n;
 		if(additionalProviders){
 			for(n in additionalProviders){
 				options.providers[n] = additionalProviders[n];
 			}
 		}
-		for(n in options.providers){providers.push(n);}
-		providers = providers.join('|').replace('.','\.');
-		var seek = new RegExp('^(\d\d+x\d\d+:)?((?:https?:)\/\/(?:w+\.)?('+providers+')\/(.*?))\s|\n|$','gi');
-		data.str = data.str.replace(seek,function(total,size,url,provider,fragment){
-			var fn = options.providers[provider];
-			if(!fn){return url;}
-			var size = size?size.replace(':','').split('x'):[];
-			var className = pre+' '+pre+'-'+provider.replace(/\.(com|net|org)$/,'').replace('.','');
-			var ret = fn(fragment,className,size[0],size[1],url);
-			return ret? ret : url;
-		});
-	}
+		
+		providers = Object.keys(options.providers).map(markdown.escapeRegExp).join('|');
+		var seek = new RegExp('(?:(^|\n)(?:(\\d\\d+)x(\\d\\d+):)?(?:(?:https?:)\\/\\/(?:w+\\.)?('+providers+')\/(.*?)))(\n|$)','g');
+		locals.markdown.embed.regExp = seek;
+	});
 
-	// registers function on the raw text:
-	markdown.register('before')(embeds);
+	markdown.registerTokenFilter(
+		function(locals){
+			return locals.markdown.embed.regExp;
+		}
+	,	function tokenize(start,width,height,provider,fragment,end,match){
+			var fn = options.providers[provider];
+			var className = this.markdown.embed.class+provider.replace(/\.(com|net|org)$/,'').replace(/\./,'');
+			var embed = fn(fragment,width,height);
+			if(!embed){return false;}
+			var elem = [
+				'span'
+			,	{class:className}
+			,	embed
+			];
+			return elem;
+		}
+	);
+
 }

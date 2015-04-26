@@ -1,16 +1,20 @@
 {
   "name": "markdown-more",
-  "version": "0.7.5",
+  "version": "0.8.5",
   "description": "Helpers for creating markdown-js filters",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
   "dependencies": {
-    "markdown": "^0.5.0"
+    "markdown": "^0.5.0",
+    "mathjs": "^1.6.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "webpack": "^1.8.9"
+  },
   "scripts": {
+    "build": "webpack --progress --colors lib/index.js dist/markdown-more-filters.js && webpack --progress --colors lib/markdown.js dist/markdown-more.js && webpack -p --progress --colors lib/index.js dist/markdown-more-filters.min.js && webpack -p --progress --colors lib/markdown.js dist/markdown-more.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

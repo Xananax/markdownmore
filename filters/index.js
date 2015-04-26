@@ -1,8 +1,8 @@
 
 module.exports = function(markdown){
 
-	require('./arrows')(markdown);
-	require('./calculus')(markdown);
+	require('./templating')(markdown);
+	require('./headers')(markdown);
 	require('./checkboxes')(markdown);
 	require('./embed')(markdown);
 	require('./entities')(markdown);
@@ -10,6 +10,6 @@ module.exports = function(markdown){
 	require('./iframes')(markdown);
 	require('./linebreaks')(markdown);
 	require('./mentions-hashtags')(markdown);
-	require('./templating')(markdown);
+	require('./wrap')(markdown);
 	
 }
