@@ -31,6 +31,7 @@ module.exports = function(markdown){
 			type:'checkbox'
 		,	class:class_pre
 		,	id:id
+		,	name:id
 		}
 		if(match[2]){props.checked = '';}
 		if(match[3]){props.checked = '';props.disabled='';}
@@ -47,7 +48,7 @@ module.exports = function(markdown){
 			]
 		,	[
 				'label'
-			,	{				
+			,	{
 					id:id+'-label'
 				,	'for':id
 				,	class:class_pre+'-label-wrapper'
