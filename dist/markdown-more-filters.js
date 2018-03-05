@@ -42,19 +42,19 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	var markdown = __webpack_require__(1)
-	__webpack_require__(2)(markdown);
+	__webpack_require__(9)(markdown);
 
 	module.exports = markdown;
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-	var md = __webpack_require__(14).markdown;
-	var dialect = __webpack_require__(3);
+	var md = __webpack_require__(2).markdown;
+	var dialect = __webpack_require__(8);
 
 	module.exports = (function(){
 
@@ -275,803 +275,18 @@
 
 	})();
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	module.exports = function(markdown){
-
-		__webpack_require__(4)(markdown);
-		__webpack_require__(5)(markdown);
-		__webpack_require__(6)(markdown);
-		__webpack_require__(7)(markdown);
-		__webpack_require__(8)(markdown);
-		__webpack_require__(9)(markdown);
-		__webpack_require__(10)(markdown);
-		__webpack_require__(11)(markdown);
-		__webpack_require__(12)(markdown);
-		__webpack_require__(13)(markdown);
-		
-	}
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var markdown = __webpack_require__(14).markdown;
-	var dialect = module.exports = markdown.Markdown.subclassDialect(markdown.Markdown.dialects.Maruku);
-
-	var langs = {
-		'js':'javascript'
-	,	'htm':'markup'
-	,	'html':'markup'
-	}
-
-	dialect.inline["`"] = function inlineCode( text ) {
-		// Inline code block. as many backticks as you like to start it
-		// Always skip over the opening ticks.
-		var m = text.match( /(`+)(?:(\w+)\s*?\n)?(([\s\S]*?)\1)/ );
-		if(m && m[3]){
-			var length = m[1].length + m[3].length;
-			var text = m[4];
-			if(m[1].length > 2){
-				if(m[2]){
-					length+=m[2].length+1;
-					var lang = m[2].replace(/\s/g,'').toLowerCase();
-					lang = langs[lang] ? langs[lang] : lang;
-					return [length,["code_block",{class:'language-'+lang},text]]
-				}
-				return [length,["code_block",text]]
-			}
-			return [length,["inlinecode", text]];
-		}
-		else {
-			// TODO: No matching end code found - warn!
-			return [1,"`"];
-		}
-	}
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-				evaluate: /\{\{([^`'"][\s\S]+?)\}\}/g
-			,	iterate : /^(?:each|for|#) (\w+)(?:\s*?,\s*?(\w+))?\s+?in\s+([\s\S]+)$/
-			,	end:/^end$/
-			,	conditionalElse:/^else$/
-			,	conditional:/^(?:\?|if)\s+?([\s\S]+)$/
-			,	escape:/^!\s?([\s\S]+)$/
-			,	interpolate: /^([\s\S]+)$/
-			}
-		,	escapes = {
-				'"':      '"'
-			,	'\\':     '\\'
-			,	'\r':     'r'
-			,	'\n':     'n'
-			,	'\t':     't'
-			,	'\u2028': 'u2028'
-			,	'\u2029': 'u2029'
-			}
-		,	escaper = /(\\|"|\r|\n|\t|\u2028|\u2029)/g
-		,	entitiesEscape= {
-				'&': '&amp;'
-			,	'<': '&lt;'
-			,	'>': '&gt;'
-			,	'"': '&quot;'
-			,	"'": '&#x27;'
-			,	'/': '&#x2F;'
-			}
-		,	entitiesRegex=/[&<>"'\/"]/g;
-		;
-
-		function escapeEntities(string){
-			if (string == null) return '';
-			return ('' + string).replace(entitiesRegex, function(match) {
-				return entitiesEscape[match];
-			});
-		}
-
-		function templateSafe(str,escape){
-			var src = '";\n';
-			if(/\(/.test(str)){
-				src+='__p+=(function(_d){try{return _d.'+str+';}catch(e){return "";}})(locals)'
-			}
-			else{
-				src+='__p+=((__t=(locals.'+str+'))===null?"":'+
-				(escape?'__escape(__t)':'__t')+')'
-			}
-			src+=';\n__p+="';
-			return src;
-		}
-
-		function template(text,locals){
-			var source = '__p="';
-			var index = 0;
-			var render;
-			text.replace(options.evaluate, function(match,inside,offset){
-				source += text.slice(index, offset)
-	        		.replace(escaper, function(match) { return '\\' + escapes[match]; });
-				var m;
-				if(options.iterate.test(inside)){
-					m = (options.iterate.exec(inside) || []);
-					var v = m[1];
-					var current = '___parent.'+m[3];
-					var o = '__obj__'
-					var i = '__i__';
-					var k = m[2] || 'key';
-					var l = 'length';
-					var ks = '___keys___'
-					source+='";\n(function(___parent){\n'+
-						'\tif(!'+current+'){return;}\n'+
-						'\tvar __obj__='+current+','+i+'=0,'+ks+','+v+',locals={'+v+':null,first:true,last:false,odd:false,even:true};\n'+
-						'\tif(!Array.isArray('+o+')){'+ks+'=Object.keys('+o+');'+l+'='+ks+'.length;}\n'+
-						'\telse{'+l+'='+o+'.length;}\n'+
-						'\tfor('+i+';'+i+'<'+l+';'+i+'++){\n'+
-						'\t\t'+k+'= ('+ks+'?'+ks+'['+i+']:'+i+');\n'+
-						'\t\tlocals.'+k+'='+k+';locals.first=('+i+'==0);locals.last=('+i+'>='+l+');locals.even=(('+i+' %2)==0);locals.odd=!locals.even;\n'+
-						'\t\tlocals.'+v+'='+o+'['+k+'];\n\t\t__p+="'
-					;
-						
-				}
-				else if(options.conditional.test(inside)){
-					m = (options.conditional.exec(inside) || []);
-					var condition = m[1];
-					if(condition){
-						condition = condition.replace(/(^|\s|\(|\||&)((?:\w+)[\w\d]+)/g,'$1locals.$2');
-						source+='";\n(function(){\n'+
-							'\tif('+condition+'){\n__p+="'
-						;
-					}
-				}
-				else if(options.conditionalElse.test(inside)){
-					source+='";\n\t}else{\n__p+="';
-				}
-				else if(options.end.test(inside)){
-					source+='";\n}})(locals);locals=arguments[0];\n__p+="';
-				}
-				else if(options.escape.test(inside)){
-					m = (options.escape.exec(inside) || []);
-					source+=templateSafe(m[1],true);
-				}
-				else if(options.interpolate.test(inside)){
-					m = (options.interpolate.exec(inside) || []);
-					source+=templateSafe(m[1]);
-				}
-				index = offset + match.length;
-			});
-			if(index<text.length){
-				source+='";__p+="'+text.slice(index).replace(escaper, function(match) { return '\\' + escapes[match]; })+'";__p+="';
-			}
-			source+='";\nreturn __p;\n';
-			
-			try{
-				render = new Function('locals','__escape',source);
-			}catch(e){
-				e.source = source;
-				console.log('-----------------------');
-				console.log(source);
-				console.log('-----------------------');
-				throw e;
-			}
-
-			if(locals){
-				return render(locals,escapeEntities);
-			}
-			var template = function(locals){
-				return render.call(this,locals,escapeEntities);
-			}
-			source='function(locals,__escape){\n'+source+'}';
-			template.source = source;
-			return template;
-		}
-
-		// Simple mustache-like variables replacement
-		markdown.register('before',function(data,locals){
-			data.str = template(data.str,locals || {});
-		});
-
-	}
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			id_prefix:''
-		,	level:3
-		}
-
-		markdown.registerJsonFilter('header',function(jsonml,locals){
-			var max_level = locals.markdown.headers.level;
-			var level = jsonml[1].level;
-			if(level<=max_level){
-				var n = 0;
-				var pre = locals.markdown.headers.id_prefix;
-				var ids = locals.markdown.headers.ids;
-				var text = jsonml[2];
-				while(Array.isArray(text)){
-					text = text[3] || text[2];
-				}
-				if(jsonml[1].id){
-					ids[jsonml[1].id] = [level,text];
-					return;
-				}
-				var _id = pre+text
-					.toLowerCase()
-					.replace(/\s+/g,' ')
-					.replace(/\s/,'-')
-					.replace(/:|\[|\]|\{|\}|\%|\(|\)|\^|\$/,'')
-				;
-				var id = _id;
-				while(ids[id]){
-					id = _id+(n++);
-				}
-				ids[id] = [level,text];
-				jsonml[1].id = id;
-			}
-		});
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown = {};}
-			if(!locals.markdown.headers){locals.markdown.headers = {};}
-			locals.markdown.headers.level = locals.markdown.headers.level || options.level;
-			locals.markdown.headers.id_prefix = locals.markdown.headers.id_prefix || options.id_prefix;
-			locals.markdown.headers.ids = locals.markdown.headers.ids || {};
-		});
-
-	}
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			class_prefix: 'input-checkbox'
-		,	id_prefix: 'checkbox'
-		}
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown={};}
-			if(!locals.markdown.checkbox){locals.markdown.checkbox={};}
-			if(!locals.markdown.checkbox.ids){locals.markdown.checkbox.ids=0;}
-			if(locals.markdown.checkbox.class_prefix){options.class_prefix = locals.markdown.checkbox.class_prefix;}
-			if(locals.markdown.checkbox.id_prefix){options.id_prefix = locals.markdown.checkbox.id_prefix;}
-		});
-
-		markdown.registerShortcode(/(\s)|(x|\*|✓|✔|☑)|(×|X|✕|☓|✖|✗|✘)/,function(str,meta,locals){
-
-			var id_pre = options.id_prefix
-			,	class_pre = options.class_prefix
-			,	id = id_pre+(locals.markdown.checkbox.ids++)
-			,	match = str.match(this.regExp)
-			,	value = (meta.title || meta.label) || ''
-			;
-
-			var props = {
-				type:'checkbox'
-			,	class:class_pre
-			,	id:id
-			}
-			if(match[2]){props.checked = '';}
-			if(match[3]){props.checked = '';props.disabled='';}
-			if(value){props.value = value;}
-			var elem = ['label'
-			,	{
-					id:id+'-wrapper'
-				,	'for':id
-				,	class:class_pre+'-wrapper'
-				}
-			,	[
-					'input'
-				,	props
-				]
-			,	[
-					'label'
-				,	{				
-						id:id+'-label'
-					,	'for':id
-					,	class:class_pre+'-label-wrapper'
-					}
-				]
-			];
-			if(meta.label){
-				elem[3].push([
-					'span'
-				,	{class:class_pre+'-label-text'}
-				,	meta.label
-				]);
-			}
-			return [elem];
-		});
-	}
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			class_prefix:'embed'
-		,	providers:{
-				'youtube.com':function(frag,w,h){
-					frag = frag.split('?');
-					var i=0,l=frag.length;
-					while(i < l && !url && !/^v=/.test(frag[i])){
-						i++;
-					}
-					var url = frag[i];
-					if(!url){return false;}
-					url = url.replace(/v=/,'');
-					w = w || 560;
-					h = h || 315;
-					//return [];
-					return ([
-						'iframe'
-					,	{
-							height:h+'px'
-						,	width:w+'px'
-						,	allowfullscreen:'allowfullscreen'
-						,	src:'//www.youtube.com/embed/'+url
-						,	frameborder:'0'
-						}
-					]);
-				}
-			,	'youtu.be':function(frag,w,h){
-					url = frag.split('?').shift();
-					w = w || 560;
-					h = h || 315;
-					return ([
-						'iframe'
-					,	{
-							src:'//www.youtube.com/embed/'+url
-						,	frameborder:'0'
-						,	height:h+'px'
-						,	width:w+'px'
-						,	allowfullscreen:'allowfullscreen'
-						}
-					]);
-				}
-			,	'vimeo.com':function(frag,w,h){
-					var url = frag.split('/').pop();
-					w = w || 281;
-					h = h || 500;
-					return ([
-						'iframe'
-					,	{	
-							src:'//player.vimeo.com/video/'+url
-						,	frameborder:'0'
-						,	height:h+'px'
-						,	width:w+'px'
-						,	allowfullscreen:'allowfullscreen'
-						,	webkitallowfullscreen:'webkitallowfullscreen'
-						,	mozallowfullscreen:'mozallowfullscreen'
-						}
-					]);
-				}
-			}
-		}
-
-		markdown.register('before',function embeds(data,locals){
-			if(!locals.markdown){locals.markdown={};}
-			if(!locals.markdown.embed){locals.markdown.embed = {};}
-			var pre = locals.markdown.embed.class_prefix || options.class_prefix;
-			locals.markdown.embed.class = pre+' '+pre+'-';
-			var providers = [];
-			var additionalProviders = locals.markdown.embed.providers;
-			var n;
-			if(additionalProviders){
-				for(n in additionalProviders){
-					options.providers[n] = additionalProviders[n];
-				}
-			}
-			
-			providers = Object.keys(options.providers).map(markdown.escapeRegExp).join('|');
-			var seek = new RegExp('(?:(^|\n)(?:(\\d\\d+)x(\\d\\d+):)?(?:(?:https?:)\\/\\/(?:w+\\.)?('+providers+')\/(.*?)))(\n|$)','g');
-			locals.markdown.embed.regExp = seek;
-		});
-
-		markdown.registerTokenFilter(
-			function(locals){
-				return locals.markdown.embed.regExp;
-			}
-		,	function tokenize(start,width,height,provider,fragment,end,match){
-				var fn = options.providers[provider];
-				var className = this.markdown.embed.class+provider.replace(/\.(com|net|org)$/,'').replace(/\./,'');
-				var embed = fn(fragment,width,height);
-				if(!embed){return false;}
-				var elem = [
-					'span'
-				,	{class:className}
-				,	embed
-				];
-				return elem;
-			}
-		);
-
-	}
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			class_prefix:'entity'
-		,	render:function(className,content){
-				return ['span'
-				,	{class:className}
-				,	['span',content]
-				];
-			}
-		,	characters:{
-				'(c)':['copyright','©']
-			,	'<3':['heart','♥']
-			,	'(tm)':['trademark','™']
-			,	'(r)':['registered','®']
-			,	'~=':['approx','≈']
-			,	'>=':['greaterOrEqual','≥']
-			,	'<=':['lowerOrEqual','≤']
-			,	'!=':['notEqual','≠']
-			,	'-->>':['rightArrow','⇒']
-			,	'<<--':['leftArrow','⇐']
-			,	'<<-->>':['leftRightArr','⇔']
-			,	'->':['rightArr','→']
-			,	'<-':['leftArr','←']
-			,	'<->':['leftRightArr','↔']
-			,	'--':['dash','—']
-			}
-		};
-
-		markdown.registerTokenFilter(
-			function(locals){
-				return locals.markdown.entities.regExp;
-			}
-		,	function tokenize(token){
-				var pre = this.markdown.entities.class;
-				var entities = options.characters;
-				var render = this.markdown.entities.render;
-				if(entities[token]){
-					var e = entities[token];
-					return render(pre+e[0],e[1]);
-				}
-			}
-		);
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown = {};}
-			if(!locals.markdown.entities){locals.markdown.entities = {};}
-			var class_prefix = locals.markdown.entities.class_prefix || options.class_prefix;
-			locals.markdown.entities.class = class_prefix+' '+class_prefix+'-';
-			locals.markdown.entities.render = locals.markdown.entities.render || options.render;
-			var additionalCharacters = locals.markdown.entities.characters;
-			if(additionalCharacters){
-				for(var n in additionalCharacters){
-					options.characters[n] = additionalCharacters[n];
-				}
-			}
-			var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
-			locals.markdown.entities.regExp = new RegExp('('+charsString+')','g');
-		});
-	}
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			class_prefix:'fa'
-		,	render:function(className,content){
-				return ['i'
-				,	{class:className}
-				,	['span',content]
-				];
-			}
-		,	characters:{
-				'+':'plus-circle'
-			,	'-':'minus-circle'
-			,	'#':'check'
-			,	'x':'times'
-			,	'?':'question'
-			}
-		};
-
-		markdown.registerTokenFilter(
-			function(locals){
-				return locals.markdown.icons.regExp;
-			}
-		,	function tokenize(token){
-				var pre = this.markdown.icons.class;
-				var icons = options.characters;
-				var className = pre+(icons[token] || 'default');
-				var render = this.markdown.icons.render;
-				return render(className,token);
-			}
-		);
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown = {};}
-			if(!locals.markdown.icons){locals.markdown.icons = {};}
-			var class_prefix = locals.markdown.icons.class_prefix || options.class_prefix;
-			locals.markdown.icons.class = class_prefix+' '+class_prefix+'-';
-			locals.markdown.icons.render = locals.markdown.icons.render || options.render;
-			var additionalCharacters = locals.markdown.icons.characters;
-			if(additionalCharacters){
-				for(var n in additionalCharacters){
-					options.characters[n] = additionalCharacters[n];
-				}
-			}
-			var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
-			locals.markdown.icons.regExp = new RegExp('(?:\\(('+charsString+')\\))','g');
-		});
-
-	}
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			class_prefix:'iframe'
-		,	default_width:400
-		,	default_height:300
-		,	default_border:0
-		}
-
-
-		markdown.registerCommandFilter('iframe',function(src,size,border){
-			var height,width;
-			var provider = src.replace(/^https?:/,'')
-				.replace(/^\/+/,'')
-				.split('/').shift()
-				.replace(/\.(com|org|net)/,'')
-				.replace(/\.(\w+)$/,'$1')
-				.split('.')
-				.shift()
-			;
-			if(size){
-				size = size.split('x');
-				width = size.shift();
-				height = size.shift() || width;
-			}
-			var props = {
-				src:src
-			,	width: (width || this.markdown.iframe.default_width)+'px'
-			,	height: (height || this.markdown.iframe.default_height)+'px'
-			,	frameborder: (border || this.markdown.iframe.default_border)+''
-			}
-			var className = this.markdown.iframe.className+provider;
-			return [
-				'span'
-			,	{class:className}
-			,	[
-					'iframe'
-				,	props
-				]
-			]
-		});
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown={};}
-			if(!locals.markdown.iframe){locals.markdown.iframe = {};}
-			var pre = locals.markdown.iframe.class_prefix || options.class_prefix;
-			locals.markdown.iframe.default_height = locals.markdown.iframe.default_height || options.default_height;
-			locals.markdown.iframe.default_width = locals.markdown.iframe.default_width || options.default_width;
-			locals.markdown.iframe.default_border = locals.markdown.iframe.default_border || options.default_border;
-			locals.markdown.iframe.className = pre+' '+pre+'-';
-
-		});
-	}
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		// replaces line breaks with two spaces then break
-		markdown.register('before',function(data){
-			data.str = data.str.replace(/([^\s])\n/g,'$1  \n');
-		});
-	}
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		__webpack_require__(15)(markdown);
-
-		markdown.modifier
-			('@',function(word,locals){
-				return [
-					'a'
-				,	{class:'mention',href:'#/mentions/'+word}
-				,	['em','@']
-				,	['span',word]
-				]
-			})
-			('#',function(word,locals){
-				return [
-					'a'
-				,	{class:'hashtag',href:'#/hashtags/'+word}
-				,	['em','#']
-				,	['span',word]
-				]
-			})
-		;
-
-	}
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			class_suffix:'-wrapper'
-		}
-
-		function wrap(element){
-			markdown.registerJsonFilter(element,function(jsonml,locals,parent,index){
-				//if(parent && parent[0] == 'span' && parent[1]['data-type']){return;}
-				return [[
-					'span'
-				,	{class:element+locals.markdown.wrap.class_suffix}
-				,	jsonml
-				]];
-			});
-		}
-
-		function register_wrappers(locals){
-			var wrappers = locals.markdown.wrap.wrappers;
-			var i=0, l = wrappers && wrappers.length;
-			if(l){
-				for(i,l;i<l;i++){
-					wrap(wrappers[i]);
-				}
-			}
-		}
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown={};}
-			if(!locals.markdown.wrap){locals.markdown.wrap = {};}
-			locals.markdown.wrap.class_suffix = locals.markdown.wrap.class_suffix || options.class_suffix;
-			register_wrappers(locals);
-		});
-
-		markdown.wrap = wrap;
-	}
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	// super simple module for the most common nodejs use case.
-	exports.markdown = __webpack_require__(16);
+	exports.markdown = __webpack_require__(3);
 	exports.parse = exports.markdown.toHTML;
 
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var registered = false;
-
-	module.exports = function(markdown){
-
-		if(registered){return false;}
-		registered = true;
-
-		var options = {
-			characters:{}
-		};
-
-		markdown.modifier = function(character,fn){
-			if(arguments.length>1){
-				options.characters[character] = fn;
-				return markdown.modifier;
-			}
-			return options.characters[character];
-		}
-
-
-		markdown.registerTokenFilter(
-			function(locals){
-				return locals.markdown.modifiers.regExp;
-			}
-		,	function tokenize(mod,word,match){
-				var fn = options.characters[mod];
-				if(typeof fn == 'function'){
-					return fn.call(this,word);
-				}
-			}
-		);
-
-		markdown.register('before',function(data,locals){
-			if(!locals.markdown){locals.markdown = {};}
-			if(!locals.markdown.modifiers){locals.markdown.modifiers = {};}
-			var class_prefix = locals.markdown.modifiers.class_prefix || options.class_prefix;
-			locals.markdown.modifiers.class = class_prefix+' '+class_prefix+'-'
-			var additionalCharacters = locals.markdown.modifiers.characters;
-			if(additionalCharacters){
-				for(var n in additionalCharacters){
-					options.characters[n] = additionalCharacters[n];
-				}
-			}
-			var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
-			locals.markdown.modifiers.regExp = new RegExp('(?:('+charsString+')([a-zA-Z0-9-_]+))','g');
-		});
-
-	}
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	// Released under MIT license
 	// Copyright (c) 2009-2010 Dominic Baggott
@@ -1202,7 +417,7 @@
 
 	// node
 	function mk_block_inspect() {
-	  var util = __webpack_require__(17);
+	  var util = __webpack_require__(4);
 	  return "Markdown.mk_block( " +
 	          util.inspect(this.toString()) +
 	          ", " +
@@ -2800,9 +2015,9 @@
 	} )() );
 
 
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global, process) {// Copyright Joyent, Inc. and other Node contributors.
 	//
@@ -3329,7 +2544,7 @@
 	}
 	exports.isPrimitive = isPrimitive;
 
-	exports.isBuffer = __webpack_require__(18);
+	exports.isBuffer = __webpack_require__(6);
 
 	function objectToString(o) {
 	  return Object.prototype.toString.call(o);
@@ -3373,7 +2588,7 @@
 	 *     prototype.
 	 * @param {function} superCtor Constructor function to inherit prototype from.
 	 */
-	exports.inherits = __webpack_require__(20);
+	exports.inherits = __webpack_require__(7);
 
 	exports._extend = function(origin, add) {
 	  // Don't do anything if add isn't an object
@@ -3391,54 +2606,166 @@
 	  return Object.prototype.hasOwnProperty.call(obj, prop);
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(19)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(5)))
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = function isBuffer(arg) {
-	  return arg && typeof arg === 'object'
-	    && typeof arg.copy === 'function'
-	    && typeof arg.fill === 'function'
-	    && typeof arg.readUInt8 === 'function';
-	}
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
 
 	// shim for using process in browser
-
 	var process = module.exports = {};
+
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+
+	function defaultSetTimout() {
+	    throw new Error('setTimeout has not been defined');
+	}
+	function defaultClearTimeout () {
+	    throw new Error('clearTimeout has not been defined');
+	}
+	(function () {
+	    try {
+	        if (typeof setTimeout === 'function') {
+	            cachedSetTimeout = setTimeout;
+	        } else {
+	            cachedSetTimeout = defaultSetTimout;
+	        }
+	    } catch (e) {
+	        cachedSetTimeout = defaultSetTimout;
+	    }
+	    try {
+	        if (typeof clearTimeout === 'function') {
+	            cachedClearTimeout = clearTimeout;
+	        } else {
+	            cachedClearTimeout = defaultClearTimeout;
+	        }
+	    } catch (e) {
+	        cachedClearTimeout = defaultClearTimeout;
+	    }
+	} ())
+	function runTimeout(fun) {
+	    if (cachedSetTimeout === setTimeout) {
+	        //normal enviroments in sane situations
+	        return setTimeout(fun, 0);
+	    }
+	    // if setTimeout wasn't available but was latter defined
+	    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+	        cachedSetTimeout = setTimeout;
+	        return setTimeout(fun, 0);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedSetTimeout(fun, 0);
+	    } catch(e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+	            return cachedSetTimeout.call(null, fun, 0);
+	        } catch(e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+	            return cachedSetTimeout.call(this, fun, 0);
+	        }
+	    }
+
+
+	}
+	function runClearTimeout(marker) {
+	    if (cachedClearTimeout === clearTimeout) {
+	        //normal enviroments in sane situations
+	        return clearTimeout(marker);
+	    }
+	    // if clearTimeout wasn't available but was latter defined
+	    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+	        cachedClearTimeout = clearTimeout;
+	        return clearTimeout(marker);
+	    }
+	    try {
+	        // when when somebody has screwed with setTimeout but no I.E. maddness
+	        return cachedClearTimeout(marker);
+	    } catch (e){
+	        try {
+	            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+	            return cachedClearTimeout.call(null, marker);
+	        } catch (e){
+	            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+	            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+	            return cachedClearTimeout.call(this, marker);
+	        }
+	    }
+
+
+
+	}
 	var queue = [];
 	var draining = false;
+	var currentQueue;
+	var queueIndex = -1;
+
+	function cleanUpNextTick() {
+	    if (!draining || !currentQueue) {
+	        return;
+	    }
+	    draining = false;
+	    if (currentQueue.length) {
+	        queue = currentQueue.concat(queue);
+	    } else {
+	        queueIndex = -1;
+	    }
+	    if (queue.length) {
+	        drainQueue();
+	    }
+	}
 
 	function drainQueue() {
 	    if (draining) {
 	        return;
 	    }
+	    var timeout = runTimeout(cleanUpNextTick);
 	    draining = true;
-	    var currentQueue;
+
 	    var len = queue.length;
 	    while(len) {
 	        currentQueue = queue;
 	        queue = [];
-	        var i = -1;
-	        while (++i < len) {
-	            currentQueue[i]();
+	        while (++queueIndex < len) {
+	            if (currentQueue) {
+	                currentQueue[queueIndex].run();
+	            }
 	        }
+	        queueIndex = -1;
 	        len = queue.length;
 	    }
+	    currentQueue = null;
 	    draining = false;
+	    runClearTimeout(timeout);
 	}
+
 	process.nextTick = function (fun) {
-	    queue.push(fun);
-	    if (!draining) {
-	        setTimeout(drainQueue, 0);
+	    var args = new Array(arguments.length - 1);
+	    if (arguments.length > 1) {
+	        for (var i = 1; i < arguments.length; i++) {
+	            args[i - 1] = arguments[i];
+	        }
+	    }
+	    queue.push(new Item(fun, args));
+	    if (queue.length === 1 && !draining) {
+	        runTimeout(drainQueue);
 	    }
 	};
 
+	// v8 likes predictible objects
+	function Item(fun, array) {
+	    this.fun = fun;
+	    this.array = array;
+	}
+	Item.prototype.run = function () {
+	    this.fun.apply(null, this.array);
+	};
 	process.title = 'browser';
 	process.browser = true;
 	process.env = {};
@@ -3455,12 +2782,15 @@
 	process.removeListener = noop;
 	process.removeAllListeners = noop;
 	process.emit = noop;
+	process.prependListener = noop;
+	process.prependOnceListener = noop;
+
+	process.listeners = function (name) { return [] }
 
 	process.binding = function (name) {
 	    throw new Error('process.binding is not supported');
 	};
 
-	// TODO(shtylman)
 	process.cwd = function () { return '/' };
 	process.chdir = function (dir) {
 	    throw new Error('process.chdir is not supported');
@@ -3468,9 +2798,20 @@
 	process.umask = function() { return 0; };
 
 
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+	module.exports = function isBuffer(arg) {
+	  return arg && typeof arg === 'object'
+	    && typeof arg.copy === 'function'
+	    && typeof arg.fill === 'function'
+	    && typeof arg.readUInt8 === 'function';
+	}
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
 
 	if (typeof Object.create === 'function') {
 	  // implementation from standard node.js 'util' module
@@ -3497,5 +2838,792 @@
 	}
 
 
-/***/ }
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var markdown = __webpack_require__(2).markdown;
+	var dialect = module.exports = markdown.Markdown.subclassDialect(markdown.Markdown.dialects.Maruku);
+
+	var langs = {
+		'js':'javascript'
+	,	'htm':'markup'
+	,	'html':'markup'
+	}
+
+	dialect.inline["`"] = function inlineCode( text ) {
+		// Inline code block. as many backticks as you like to start it
+		// Always skip over the opening ticks.
+		var m = text.match( /(`+)(?:(\w+)\s*?\n)?(([\s\S]*?)\1)/ );
+		if(m && m[3]){
+			var length = m[1].length + m[3].length;
+			var text = m[4];
+			if(m[1].length > 2){
+				if(m[2]){
+					length+=m[2].length+1;
+					var lang = m[2].replace(/\s/g,'').toLowerCase();
+					lang = langs[lang] ? langs[lang] : lang;
+					return [length,["code_block",{class:'language-'+lang},text]]
+				}
+				return [length,["code_block",text]]
+			}
+			return [length,["inlinecode", text]];
+		}
+		else {
+			// TODO: No matching end code found - warn!
+			return [1,"`"];
+		}
+	}
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	
+	module.exports = function(markdown){
+
+		__webpack_require__(10)(markdown);
+		__webpack_require__(11)(markdown);
+		__webpack_require__(12)(markdown);
+		__webpack_require__(13)(markdown);
+		__webpack_require__(14)(markdown);
+		__webpack_require__(15)(markdown);
+		__webpack_require__(16)(markdown);
+		__webpack_require__(17)(markdown);
+		__webpack_require__(18)(markdown);
+		__webpack_require__(20)(markdown);
+		
+	}
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+				evaluate: /\{\{([^`'"][\s\S]+?)\}\}/g
+			,	iterate : /^(?:each|for|#) (\w+)(?:\s*?,\s*?(\w+))?\s+?in\s+([\s\S]+)$/
+			,	end:/^end$/
+			,	conditionalElse:/^else$/
+			,	conditional:/^(?:\?|if)\s+?([\s\S]+)$/
+			,	escape:/^!\s?([\s\S]+)$/
+			,	interpolate: /^([\s\S]+)$/
+			}
+		,	escapes = {
+				'"':      '"'
+			,	'\\':     '\\'
+			,	'\r':     'r'
+			,	'\n':     'n'
+			,	'\t':     't'
+			,	'\u2028': 'u2028'
+			,	'\u2029': 'u2029'
+			}
+		,	escaper = /(\\|"|\r|\n|\t|\u2028|\u2029)/g
+		,	entitiesEscape= {
+				'&': '&amp;'
+			,	'<': '&lt;'
+			,	'>': '&gt;'
+			,	'"': '&quot;'
+			,	"'": '&#x27;'
+			,	'/': '&#x2F;'
+			}
+		,	entitiesRegex=/[&<>"'\/"]/g;
+		;
+
+		function escapeEntities(string){
+			if (string == null) return '';
+			return ('' + string).replace(entitiesRegex, function(match) {
+				return entitiesEscape[match];
+			});
+		}
+
+		function templateSafe(str,escape){
+			var src = '";\n';
+			if(/\(/.test(str)){
+				src+='__p+=(function(_d){try{return _d.'+str+';}catch(e){return "";}})(locals)'
+			}
+			else{
+				src+='__p+=((__t=(locals.'+str+'))===null?"":'+
+				(escape?'__escape(__t)':'__t')+')'
+			}
+			src+=';\n__p+="';
+			return src;
+		}
+
+		function template(text,locals){
+			var source = '__p="';
+			var index = 0;
+			var render;
+			text.replace(options.evaluate, function(match,inside,offset){
+				source += text.slice(index, offset)
+	        		.replace(escaper, function(match) { return '\\' + escapes[match]; });
+				var m;
+				if(options.iterate.test(inside)){
+					m = (options.iterate.exec(inside) || []);
+					var v = m[1];
+					var current = '___parent.'+m[3];
+					var o = '__obj__'
+					var i = '__i__';
+					var k = m[2] || 'key';
+					var l = 'length';
+					var ks = '___keys___'
+					source+='";\n(function(___parent){\n'+
+						'\tif(!'+current+'){return;}\n'+
+						'\tvar __obj__='+current+','+i+'=0,'+ks+','+v+',locals={'+v+':null,first:true,last:false,odd:false,even:true};\n'+
+						'\tif(!Array.isArray('+o+')){'+ks+'=Object.keys('+o+');'+l+'='+ks+'.length;}\n'+
+						'\telse{'+l+'='+o+'.length;}\n'+
+						'\tfor('+i+';'+i+'<'+l+';'+i+'++){\n'+
+						'\t\t'+k+'= ('+ks+'?'+ks+'['+i+']:'+i+');\n'+
+						'\t\tlocals.'+k+'='+k+';locals.first=('+i+'==0);locals.last=('+i+'>='+l+');locals.even=(('+i+' %2)==0);locals.odd=!locals.even;\n'+
+						'\t\tlocals.'+v+'='+o+'['+k+'];\n\t\t__p+="'
+					;
+						
+				}
+				else if(options.conditional.test(inside)){
+					m = (options.conditional.exec(inside) || []);
+					var condition = m[1];
+					if(condition){
+						condition = condition.replace(/(^|\s|\(|\||&)((?:\w+)[\w\d]+)/g,'$1locals.$2');
+						source+='";\n(function(){\n'+
+							'\tif('+condition+'){\n__p+="'
+						;
+					}
+				}
+				else if(options.conditionalElse.test(inside)){
+					source+='";\n\t}else{\n__p+="';
+				}
+				else if(options.end.test(inside)){
+					source+='";\n}})(locals);locals=arguments[0];\n__p+="';
+				}
+				else if(options.escape.test(inside)){
+					m = (options.escape.exec(inside) || []);
+					source+=templateSafe(m[1],true);
+				}
+				else if(options.interpolate.test(inside)){
+					m = (options.interpolate.exec(inside) || []);
+					source+=templateSafe(m[1]);
+				}
+				index = offset + match.length;
+			});
+			if(index<text.length){
+				source+='";__p+="'+text.slice(index).replace(escaper, function(match) { return '\\' + escapes[match]; })+'";__p+="';
+			}
+			source+='";\nreturn __p;\n';
+			
+			try{
+				render = new Function('locals','__escape',source);
+			}catch(e){
+				e.source = source;
+				console.log('-----------------------');
+				console.log(source);
+				console.log('-----------------------');
+				throw e;
+			}
+
+			if(locals){
+				return render(locals,escapeEntities);
+			}
+			var template = function(locals){
+				return render.call(this,locals,escapeEntities);
+			}
+			source='function(locals,__escape){\n'+source+'}';
+			template.source = source;
+			return template;
+		}
+
+		// Simple mustache-like variables replacement
+		markdown.register('before',function(data,locals){
+			data.str = template(data.str,locals || {});
+		});
+
+	}
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			id_prefix:''
+		,	level:3
+		}
+
+		markdown.registerJsonFilter('header',function(jsonml,locals){
+			var max_level = locals.markdown.headers.level;
+			var level = jsonml[1].level;
+			if(level<=max_level){
+				var n = 0;
+				var pre = locals.markdown.headers.id_prefix;
+				var ids = locals.markdown.headers.ids;
+				var text = jsonml[2];
+				while(Array.isArray(text)){
+					text = text[3] || text[2];
+				}
+				if(jsonml[1].id){
+					ids[jsonml[1].id] = [level,text];
+					return;
+				}
+				var _id = pre+text
+					.toLowerCase()
+					.replace(/\s+/g,' ')
+					.replace(/\s/,'-')
+					.replace(/:|\[|\]|\{|\}|\%|\(|\)|\^|\$/,'')
+				;
+				var id = _id;
+				while(ids[id]){
+					id = _id+(n++);
+				}
+				ids[id] = [level,text];
+				jsonml[1].id = id;
+			}
+		});
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown = {};}
+			if(!locals.markdown.headers){locals.markdown.headers = {};}
+			locals.markdown.headers.level = locals.markdown.headers.level || options.level;
+			locals.markdown.headers.id_prefix = locals.markdown.headers.id_prefix || options.id_prefix;
+			locals.markdown.headers.ids = locals.markdown.headers.ids || {};
+		});
+
+	}
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			class_prefix: 'input-checkbox'
+		,	id_prefix: 'checkbox'
+		}
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown={};}
+			if(!locals.markdown.checkbox){locals.markdown.checkbox={};}
+			if(!locals.markdown.checkbox.ids){locals.markdown.checkbox.ids=0;}
+			if(locals.markdown.checkbox.class_prefix){options.class_prefix = locals.markdown.checkbox.class_prefix;}
+			if(locals.markdown.checkbox.id_prefix){options.id_prefix = locals.markdown.checkbox.id_prefix;}
+		});
+
+		markdown.registerShortcode(/(\s)|(x|\*|✓|✔|☑)|(×|X|✕|☓|✖|✗|✘)/,function(str,meta,locals){
+
+			var id_pre = options.id_prefix
+			,	class_pre = options.class_prefix
+			,	id = id_pre+(locals.markdown.checkbox.ids++)
+			,	match = str.match(this.regExp)
+			,	value = (meta.title || meta.label) || ''
+			;
+
+			var props = {
+				type:'checkbox'
+			,	class:class_pre
+			,	id:id
+			,	name:id
+			}
+			if(match[2]){props.checked = '';}
+			if(match[3]){props.checked = '';props.disabled='';}
+			if(value){props.value = value;}
+			var elem = ['label'
+			,	{
+					id:id+'-wrapper'
+				,	'for':id
+				,	class:class_pre+'-wrapper'
+				}
+			,	[
+					'input'
+				,	props
+				]
+			,	[
+					'label'
+				,	{
+						id:id+'-label'
+					,	'for':id
+					,	class:class_pre+'-label-wrapper'
+					}
+				]
+			];
+			if(meta.label){
+				elem[3].push([
+					'span'
+				,	{class:class_pre+'-label-text'}
+				,	meta.label
+				]);
+			}
+			return [elem];
+		});
+	}
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			class_prefix:'embed'
+		,	providers:{
+				'youtube.com':function(frag,w,h){
+					frag = frag.split('?');
+					var i=0,l=frag.length;
+					while(i < l && !url && !/^v=/.test(frag[i])){
+						i++;
+					}
+					var url = frag[i];
+					if(!url){return false;}
+					url = url.replace(/v=/,'');
+					w = w || 560;
+					h = h || 315;
+					//return [];
+					return ([
+						'iframe'
+					,	{
+							height:h+'px'
+						,	width:w+'px'
+						,	allowfullscreen:'allowfullscreen'
+						,	src:'//www.youtube.com/embed/'+url
+						,	frameborder:'0'
+						}
+					]);
+				}
+			,	'youtu.be':function(frag,w,h){
+					url = frag.split('?').shift();
+					w = w || 560;
+					h = h || 315;
+					return ([
+						'iframe'
+					,	{
+							src:'//www.youtube.com/embed/'+url
+						,	frameborder:'0'
+						,	height:h+'px'
+						,	width:w+'px'
+						,	allowfullscreen:'allowfullscreen'
+						}
+					]);
+				}
+			,	'vimeo.com':function(frag,w,h){
+					var url = frag.split('/').pop();
+					w = w || 281;
+					h = h || 500;
+					return ([
+						'iframe'
+					,	{	
+							src:'//player.vimeo.com/video/'+url
+						,	frameborder:'0'
+						,	height:h+'px'
+						,	width:w+'px'
+						,	allowfullscreen:'allowfullscreen'
+						,	webkitallowfullscreen:'webkitallowfullscreen'
+						,	mozallowfullscreen:'mozallowfullscreen'
+						}
+					]);
+				}
+			}
+		}
+
+		markdown.register('before',function embeds(data,locals){
+			if(!locals.markdown){locals.markdown={};}
+			if(!locals.markdown.embed){locals.markdown.embed = {};}
+			var pre = locals.markdown.embed.class_prefix || options.class_prefix;
+			locals.markdown.embed.class = pre+' '+pre+'-';
+			var providers = [];
+			var additionalProviders = locals.markdown.embed.providers;
+			var n;
+			if(additionalProviders){
+				for(n in additionalProviders){
+					options.providers[n] = additionalProviders[n];
+				}
+			}
+			
+			providers = Object.keys(options.providers).map(markdown.escapeRegExp).join('|');
+			var seek = new RegExp('(?:(^|\n)(?:(\\d\\d+)x(\\d\\d+):)?(?:(?:https?:)\\/\\/(?:w+\\.)?('+providers+')\/(.*?)))(\n|$)','g');
+			locals.markdown.embed.regExp = seek;
+		});
+
+		markdown.registerTokenFilter(
+			function(locals){
+				return locals.markdown.embed.regExp;
+			}
+		,	function tokenize(start,width,height,provider,fragment,end,match){
+				var fn = options.providers[provider];
+				var className = this.markdown.embed.class+provider.replace(/\.(com|net|org)$/,'').replace(/\./,'');
+				var embed = fn(fragment,width,height);
+				if(!embed){return false;}
+				var elem = [
+					'span'
+				,	{class:className}
+				,	embed
+				];
+				return elem;
+			}
+		);
+
+	}
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+	registered = false;
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			class_prefix:'entity'
+		,	render:function(className,content){
+				return ['span'
+				,	{class:className}
+				,	['span',content]
+				];
+			}
+		,	characters:{
+				'(c)':['copyright','©']
+			,	'<3':['heart','♥']
+			,	'(tm)':['trademark','™']
+			,	'(r)':['registered','®']
+			,	'~=':['approx','≈']
+			,	'>=':['greaterOrEqual','≥']
+			,	'<=':['lowerOrEqual','≤']
+			,	'!=':['notEqual','≠']
+			,	'-->>':['rightArrow','⇒']
+			,	'<<--':['leftArrow','⇐']
+			,	'<<-->>':['leftRightArr','⇔']
+			,	'->':['rightArr','→']
+			,	'<-':['leftArr','←']
+			,	'<->':['leftRightArr','↔']
+			,	'--':['dash','—']
+			}
+		};
+
+		markdown.registerTokenFilter(
+			function(locals){
+				return locals.markdown.entities.regExp;
+			}
+		,	function tokenize(token){
+				var pre = this.markdown.entities.class;
+				var entities = options.characters;
+				var render = this.markdown.entities.render;
+				if(entities[token]){
+					var e = entities[token];
+					return render(pre+e[0],e[1]);
+				}
+			}
+		);
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown = {};}
+			if(!locals.markdown.entities){locals.markdown.entities = {};}
+			var class_prefix = locals.markdown.entities.class_prefix || options.class_prefix;
+			locals.markdown.entities.class = class_prefix+' '+class_prefix+'-';
+			locals.markdown.entities.render = locals.markdown.entities.render || options.render;
+			var additionalCharacters = locals.markdown.entities.characters;
+			if(additionalCharacters){
+				for(var n in additionalCharacters){
+					options.characters[n] = additionalCharacters[n];
+				}
+			}
+			var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
+			locals.markdown.entities.regExp = new RegExp('('+charsString+')','g');
+		});
+	}
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			class_prefix:'fa'
+		,	render:function(className,content){
+				return ['i'
+				,	{class:className}
+				,	['span',content]
+				];
+			}
+		,	characters:{
+				'+':'plus-circle'
+			,	'-':'minus-circle'
+			,	'#':'check'
+			,	'x':'times'
+			,	'?':'question'
+			}
+		};
+
+		markdown.registerTokenFilter(
+			function(locals){
+				return locals.markdown.icons.regExp;
+			}
+		,	function tokenize(token){
+				var pre = this.markdown.icons.class;
+				var icons = options.characters;
+				var className = pre+(icons[token] || 'default');
+				var render = this.markdown.icons.render;
+				return render(className,token);
+			}
+		);
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown = {};}
+			if(!locals.markdown.icons){locals.markdown.icons = {};}
+			var class_prefix = locals.markdown.icons.class_prefix || options.class_prefix;
+			locals.markdown.icons.class = class_prefix+' '+class_prefix+'-';
+			locals.markdown.icons.render = locals.markdown.icons.render || options.render;
+			var additionalCharacters = locals.markdown.icons.characters;
+			if(additionalCharacters){
+				for(var n in additionalCharacters){
+					options.characters[n] = additionalCharacters[n];
+				}
+			}
+			var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
+			locals.markdown.icons.regExp = new RegExp('(?:\\(('+charsString+')\\))','g');
+		});
+
+	}
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			class_prefix:'iframe'
+		,	default_width:400
+		,	default_height:300
+		,	default_border:0
+		}
+
+
+		markdown.registerCommandFilter('iframe',function(src,size,border){
+			var height,width;
+			var provider = src.replace(/^https?:/,'')
+				.replace(/^\/+/,'')
+				.split('/').shift()
+				.replace(/\.(com|org|net)/,'')
+				.replace(/\.(\w+)$/,'$1')
+				.split('.')
+				.shift()
+			;
+			if(size){
+				size = size.split('x');
+				width = size.shift();
+				height = size.shift() || width;
+			}
+			var props = {
+				src:src
+			,	width: (width || this.markdown.iframe.default_width)+'px'
+			,	height: (height || this.markdown.iframe.default_height)+'px'
+			,	frameborder: (border || this.markdown.iframe.default_border)+''
+			}
+			var className = this.markdown.iframe.className+provider;
+			return [
+				'span'
+			,	{class:className}
+			,	[
+					'iframe'
+				,	props
+				]
+			]
+		});
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown={};}
+			if(!locals.markdown.iframe){locals.markdown.iframe = {};}
+			var pre = locals.markdown.iframe.class_prefix || options.class_prefix;
+			locals.markdown.iframe.default_height = locals.markdown.iframe.default_height || options.default_height;
+			locals.markdown.iframe.default_width = locals.markdown.iframe.default_width || options.default_width;
+			locals.markdown.iframe.default_border = locals.markdown.iframe.default_border || options.default_border;
+			locals.markdown.iframe.className = pre+' '+pre+'-';
+
+		});
+	}
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		// replaces line breaks with two spaces then break
+		markdown.register('before',function(data){
+			data.str = data.str.replace(/([^\s])\n/g,'$1  \n');
+		});
+	}
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		__webpack_require__(19)(markdown);
+
+		markdown.modifier
+			('@',function(word,locals){
+				return [
+					'a'
+				,	{class:'mention',href:'#/mentions/'+word}
+				,	['em','@']
+				,	['span',word]
+				]
+			})
+			('#',function(word,locals){
+				return [
+					'a'
+				,	{class:'hashtag',href:'#/hashtags/'+word}
+				,	['em','#']
+				,	['span',word]
+				]
+			})
+		;
+
+	}
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports) {
+
+	var registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			characters:{}
+		};
+
+		markdown.modifier = function(character,fn){
+			if(arguments.length>1){
+				options.characters[character] = fn;
+				return markdown.modifier;
+			}
+			return options.characters[character];
+		}
+
+
+		markdown.registerTokenFilter(
+			function(locals){
+				return locals.markdown.modifiers.regExp;
+			}
+		,	function tokenize(mod,word,match){
+				var fn = options.characters[mod];
+				if(typeof fn == 'function'){
+					return fn.call(this,word);
+				}
+			}
+		);
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown = {};}
+			if(!locals.markdown.modifiers){locals.markdown.modifiers = {};}
+			var class_prefix = locals.markdown.modifiers.class_prefix || options.class_prefix;
+			locals.markdown.modifiers.class = class_prefix+' '+class_prefix+'-'
+			var additionalCharacters = locals.markdown.modifiers.characters;
+			if(additionalCharacters){
+				for(var n in additionalCharacters){
+					options.characters[n] = additionalCharacters[n];
+				}
+			}
+			var charsString = Object.keys(options.characters).map(markdown.escapeRegExp).join('|');
+			locals.markdown.modifiers.regExp = new RegExp('(?:('+charsString+')([a-zA-Z0-9-_]+))','g');
+		});
+
+	}
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+	registered = false;
+
+	module.exports = function(markdown){
+
+		if(registered){return false;}
+		registered = true;
+
+		var options = {
+			class_suffix:'-wrapper'
+		}
+
+		function wrap(element){
+			markdown.registerJsonFilter(element,function(jsonml,locals,parent,index){
+				//if(parent && parent[0] == 'span' && parent[1]['data-type']){return;}
+				return [[
+					'span'
+				,	{class:element+locals.markdown.wrap.class_suffix}
+				,	jsonml
+				]];
+			});
+		}
+
+		function register_wrappers(locals){
+			var wrappers = locals.markdown.wrap.wrappers;
+			var i=0, l = wrappers && wrappers.length;
+			if(l){
+				for(i,l;i<l;i++){
+					wrap(wrappers[i]);
+				}
+			}
+		}
+
+		markdown.register('before',function(data,locals){
+			if(!locals.markdown){locals.markdown={};}
+			if(!locals.markdown.wrap){locals.markdown.wrap = {};}
+			locals.markdown.wrap.class_suffix = locals.markdown.wrap.class_suffix || options.class_suffix;
+			register_wrappers(locals);
+		});
+
+		markdown.wrap = wrap;
+	}
+
+/***/ })
 /******/ ]);
